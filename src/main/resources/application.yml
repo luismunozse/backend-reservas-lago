@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/lago
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  mail:
+    host: localhost
+    port: 1025   # MailHog SMTP
+    username: ""
+    password: ""
+  jackson:
+    time-zone: UTC
+  task:
+    scheduling:
+      time-zone: America/Argentina/Cordoba
+
+app:
+  defaultCapacity: 30
+  admin:
+    username: admin
+    password: admin123
+
+server:
+  port: 8080
+
+# application.yml
+logging:
+  level:
+    org.springframework.security: DEBUG
+
