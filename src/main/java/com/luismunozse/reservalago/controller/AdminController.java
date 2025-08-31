@@ -5,6 +5,8 @@ import com.luismunozse.reservalago.model.ReservationStatus;
 import com.luismunozse.reservalago.model.VisitorType;
 import com.luismunozse.reservalago.repo.AvailabilityRuleRepository;
 import com.luismunozse.reservalago.service.ReservationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Map;
 
+@Tag(name = "Admin")
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class AdminController {
     private final AvailabilityRuleRepository availability;
     private final ReservationService reservationService;
 
+    @Operation(summary = "Upsert de capacidad por dia")
     @PutMapping("/availability/{date}")
     public void upsert(@PathVariable LocalDate date, @RequestBody Map<String, Integer> body) {
         int capacity = body.getOrDefault("capacity", 0);
@@ -34,6 +38,7 @@ public class AdminController {
     }
 
     // Exportación CSV
+    @Operation(summary = "Exportar reservas CSV")
     @GetMapping("/reservations/export")
     public ResponseEntity<byte[]> export(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,

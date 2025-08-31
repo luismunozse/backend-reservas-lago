@@ -22,6 +22,12 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults());
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/admin/**").authenticated()
+                .requestMatchers(
+                        "/v3/api-docs/**",       // libre
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/docs"
+                ).permitAll()
                 .anyRequest().permitAll()
         );
         http.httpBasic(Customizer.withDefaults());
