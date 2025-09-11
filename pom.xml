@@ -96,7 +96,8 @@
                 <configuration>
                     <release>${maven.compiler.release}</release>
                     <fork>true</fork>
-                    <executable>${JAVA_HOME}/bin/javac</executable>
+                    <!--suppress UnresolvedMavenProperty -->
+					<executable>${JAVA_HOME}/bin/javac</executable>
                 </configuration>
             </plugin>
 			<plugin>

@@ -21,4 +21,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     List<Reservation> findAllByVisitDateAndStatus(LocalDate date, ReservationStatus status);
 
     List<Reservation> findAllByVisitDate(LocalDate date);
+    List<Reservation> findAllByStatus(ReservationStatus status);
 }

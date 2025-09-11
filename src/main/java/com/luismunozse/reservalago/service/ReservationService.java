@@ -1,5 +1,6 @@
 package com.luismunozse.reservalago.service;
 
+import com.luismunozse.reservalago.dto.AdminReservationDTO;
 import com.luismunozse.reservalago.dto.CreateReservationRequest;
 import com.luismunozse.reservalago.model.AvailabilityRule;
 import com.luismunozse.reservalago.model.Reservation;
@@ -19,10 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -226,6 +224,49 @@ public class ReservationService {
         return reservations.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
     }
+
+    public List<AdminReservationDTO> adminList(LocalDate date, ReservationStatus status) {
+        List<com.luismunozse.reservalago.model.Reservation> list;
+
+        if (date != null && status != null) {
+            list = reservations.findAllByVisitDateAndStatus(date, status);
+        } else if (date != null) {
+            list = reservations.findAllByVisitDate(date);
+        } else if (status != null) {
+            list = reservations.findAllByStatus(status);
+        } else {
+            list = reservations.findAll();
+        }
+
+        // Orden null-safe por createdAt desc
+        return list.stream()
+                .sorted(Comparator.comparing(
+                        com.luismunozse.reservalago.model.Reservation::getCreatedAt,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ).reversed())
+                .map(this::toAdminDTO)
+                .toList();
+    }
+
+
+    private AdminReservationDTO toAdminDTO(Reservation r) {
+        return new AdminReservationDTO(
+                r.getId(),
+                r.getVisitDate(),
+                r.getFirstName(),
+                r.getLastName(),
+                r.getAdults14Plus(),
+                r.getMinors(),
+                r.getEmail(),
+                r.getPhone(),
+                r.getCircuit() != null ? r.getCircuit().name() : null,
+                r.getVisitorType() != null ? r.getVisitorType().name() : null,
+                r.getOriginLocation(),
+                r.getStatus() != null ? r.getStatus().name() : null,
+                r.getCreatedAt() // LocalDateTime en el DTO
+        );
+    }
+
 }
 
 

@@ -1,5 +1,6 @@
 package com.luismunozse.reservalago.controller;
 
+import com.luismunozse.reservalago.dto.AdminReservationDTO;
 import com.luismunozse.reservalago.model.AvailabilityRule;
 import com.luismunozse.reservalago.model.ReservationStatus;
 import com.luismunozse.reservalago.model.VisitorType;
@@ -52,5 +53,15 @@ public class AdminController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
                 .body(data);
+    }
+
+    @Operation(summary = "Listar reservas (filtros opcionales: date, status)")
+    @GetMapping({"/reservations", "/reservations/"})
+    public java.util.List<AdminReservationDTO> listReservations(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) ReservationStatus status
+    ) {
+        return reservationService.adminList(date, status);
     }
 }
