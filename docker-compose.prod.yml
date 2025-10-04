@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: lago-postgres-prod
+    environment:
+      POSTGRES_DB: lago_prod
+      POSTGRES_USER: lago_user
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - lago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lago_user -d lago_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lago-app-prod
+    environment:
+      # Profile de Spring Boot
+      SPRING_PROFILES_ACTIVE: prod
+      
+      # Base de datos
+      DATABASE_URL: jdbc:postgresql://postgres:5432/lago_prod
+      DATABASE_USERNAME: lago_user
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      
+      # Configuración de la aplicación
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      DEFAULT_CAPACITY: ${DEFAULT_CAPACITY:-30}
+      
+      # Email
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-true}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-true}
+      APP_MAIL_FROM: ${APP_MAIL_FROM}
+      APP_MAIL_FROM_NAME: ${APP_MAIL_FROM_NAME:-Lago Escondido}
+      APP_MAIL_ENABLED: ${APP_MAIL_ENABLED:-true}
+      
+      # CORS
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://lago-escondido.com,https://www.lago-escondido.com}
+      
+      # Puerto
+      PORT: 8080
+      
+      # Logging
+      LOG_FILE: /var/log/lago-escondido/application.log
+      
+      # Java options
+      JAVA_OPTS: "-Xmx1g -Xms512m -XX:+UseG1GC -XX:+UseContainerSupport"
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_logs:/var/log/lago-escondido
+    networks:
+      - lago-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Nginx como reverse proxy (opcional)
+  nginx:
+    image: nginx:alpine
+    container_name: lago-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - lago-network
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  app_logs:
+    driver: local
+
+networks:
+  lago-network:
+    driver: bridge

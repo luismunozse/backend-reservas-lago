@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Production ###
+.env.prod
+.env.production
+*.log
+logs/
+ssl/
+backup_*.sql
+
+### Docker ###
+docker-compose.override.yml

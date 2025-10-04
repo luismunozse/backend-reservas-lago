@@ -1,0 +1,85 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5434/lago
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.format_sql: true
+      hibernate.show_sql: true
+  flyway:
+    enabled: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+  jackson:
+    time-zone: UTC
+  task:
+    scheduling:
+      time-zone: America/Argentina/Cordoba
+
+app:
+  defaultCapacity: 30
+  admin:
+    username: admin
+    password: admin123
+  mail:
+    from: ${APP_MAIL_FROM:noreply@lago-escondido.com}
+    fromName: ${APP_MAIL_FROM_NAME:Lago Escondido}
+    enabled: ${APP_MAIL_ENABLED:true}
+
+server:
+  port: 8080
+
+# Configuración de logging para desarrollo
+logging:
+  level:
+    root: INFO
+    com.luismunozse.reservalago: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Configuración de documentación API (habilitada en desarrollo)
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /docs
+    url: /v3/api-docs
+
+# Configuración de gestión de endpoints (habilitada en desarrollo)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# Configuración de CORS para desarrollo
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:3002,http://127.0.0.1:3000,http://127.0.0.1:3002
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true
+  max-age: 3600

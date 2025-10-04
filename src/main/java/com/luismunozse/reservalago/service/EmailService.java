@@ -124,7 +124,7 @@ public class EmailService {
         context.setVariable("circuitText", getCircuitText(reservation.getCircuit()));
         context.setVariable("statusText", getStatusText(reservation.getStatus()));
         
-        return templateEngine.process("reservation-confirmation-simple", context);
+        return templateEngine.process("reservation-confirmation", context);
     }
 
     /**
