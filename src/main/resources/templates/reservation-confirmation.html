@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Reserva - Lago Escondido</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c5aa0, #4a90e2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .reservation-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #2c5aa0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .detail-value {
+            color: #212529;
+            text-align: right;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #004085;
+            font-size: 16px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #2c5aa0;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌲 Lago Escondido</h1>
+            <p>Confirmación de Reserva</p>
+        </div>
+        
+        <div class="content">
+            <h2>¡Hola <span th:text="${reservation.firstName}">Nombre</span>!</h2>
+            
+            <p>Te confirmamos que hemos recibido tu reserva para visitar el Lago Escondido. 
+            A continuación encontrarás todos los detalles de tu reserva:</p>
+            
+            <div class="reservation-details">
+                <h3 style="margin-top: 0; color: #2c5aa0;">📋 Detalles de la Reserva</h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">ID de Reserva:</span>
+                    <span class="detail-value" th:text="${reservation.id}">UUID</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Fecha de Visita:</span>
+                    <span class="detail-value" th:text="${#temporals.format(reservation.visitDate, 'dd/MM/yyyy')}">Fecha</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Tipo de Visita:</span>
+                    <span class="detail-value" th:text="${visitorTypeText}">Tipo</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Circuito:</span>
+                    <span class="detail-value" th:text="${circuitText}">Circuito</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Adultos (14+ años):</span>
+                    <span class="detail-value" th:text="${reservation.adults14Plus}">0</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Menores:</span>
+                    <span class="detail-value" th:text="${reservation.minors}">0</span>
+                </div>
+                
+                <div th:if="${reservation.reducedMobility > 0}" class="detail-row">
+                    <span class="detail-label">Movilidad Reducida:</span>
+                    <span class="detail-value" th:text="${reservation.reducedMobility}">0</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Estado:</span>
+                    <span class="detail-value">
+                        <span class="status-badge status-pending" th:if="${reservation.status.name() == 'PENDING'}">Pendiente</span>
+                        <span class="status-badge status-confirmed" th:if="${reservation.status.name() == 'CONFIRMED'}">Confirmada</span>
+                    </span>
+                </div>
+                
+                <div th:if="${reservation.visitorType.name() == 'EDUCATIONAL_INSTITUTION' and reservation.institutionName != null}" class="detail-row">
+                    <span class="detail-label">Institución:</span>
+                    <span class="detail-value" th:text="${reservation.institutionName}">Institución</span>
+                </div>
+                
+                <div th:if="${reservation.originLocation != null}" class="detail-row">
+                    <span class="detail-label">Lugar de Origen:</span>
+                    <span class="detail-value" th:text="${reservation.originLocation}">Origen</span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>ℹ️ Información Importante</h3>
+                <ul>
+                    <li><strong>Estado Pendiente:</strong> Tu reserva está siendo procesada. Recibirás una confirmación definitiva próximamente.</li>
+                    <li><strong>Horario de Visita:</strong> Consulta los horarios disponibles en nuestro sitio web.</li>
+                    <li><strong>Requisitos:</strong> Presenta este email y un documento de identidad el día de tu visita.</li>
+                    <li th:if="${reservation.allergies}"><strong>Alergias:</strong> Hemos registrado que tienes alergias. Por favor, contacta con nosotros si necesitas información adicional.</li>
+                </ul>
+            </div>
+            
+            <div th:if="${reservation.comment != null and !#strings.isEmpty(reservation.comment)}" class="info-box">
+                <h3>💬 Comentarios</h3>
+                <p th:text="${reservation.comment}">Comentarios del visitante</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Lago Escondido</strong></p>
+            <p>📧 <a href="mailto:info@lago-escondido.com">info@lago-escondido.com</a></p>
+            <p>📞 +54 9 351 XXX-XXXX</p>
+            <p>🌐 <a href="https://lago-escondido.com">lago-escondido.com</a></p>
+            <p style="margin-top: 20px; font-size: 12px; color: #adb5bd;">
+                Este es un email automático, por favor no respondas a este mensaje.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

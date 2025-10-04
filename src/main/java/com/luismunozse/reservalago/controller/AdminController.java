@@ -64,4 +64,16 @@ public class AdminController {
     ) {
         return reservationService.adminList(date, status);
     }
+
+    @Operation(summary = "Confirmar una reserva")
+    @PostMapping("/reservations/{id}/confirm")
+    public void confirmReservation(@PathVariable java.util.UUID id) {
+        reservationService.confirmReservation(id);
+    }
+
+    @Operation(summary = "Cancelar una reserva")
+    @PostMapping("/reservations/{id}/cancel")
+    public void cancelReservation(@PathVariable java.util.UUID id) {
+        reservationService.cancelReservation(id);
+    }
 }

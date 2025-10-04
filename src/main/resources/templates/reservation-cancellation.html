@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancelación de Reserva - Lago Escondido</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .reservation-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .detail-value {
+            color: #212529;
+            text-align: right;
+        }
+        .info-box {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #721c24;
+            font-size: 16px;
+        }
+        .info-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 8px 0;
+            color: #721c24;
+        }
+        .contact-box {
+            background-color: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .contact-box h3 {
+            margin: 0 0 10px 0;
+            color: #004085;
+            font-size: 16px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #2c5aa0;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌲 Lago Escondido</h1>
+            <p>Cancelación de Reserva</p>
+        </div>
+        
+        <div class="content">
+            <h2>Hola <span th:text="${reservation.firstName}">Nombre</span>,</h2>
+            
+            <p>Te informamos que tu reserva para el Lago Escondido ha sido <strong>cancelada</strong>. 
+            A continuación encontrarás los detalles de la reserva cancelada:</p>
+            
+            <div class="reservation-details">
+                <h3 style="margin-top: 0; color: #dc3545;">📋 Detalles de la Reserva Cancelada</h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">ID de Reserva:</span>
+                    <span class="detail-value" th:text="${reservation.id}">UUID</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Fecha de Visita:</span>
+                    <span class="detail-value" th:text="${#temporals.format(reservation.visitDate, 'dd/MM/yyyy')}">Fecha</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Tipo de Visita:</span>
+                    <span class="detail-value" th:text="${visitorTypeText}">Tipo</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Circuito:</span>
+                    <span class="detail-value" th:text="${circuitText}">Circuito</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Adultos (14+ años):</span>
+                    <span class="detail-value" th:text="${reservation.adults14Plus}">0</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Menores:</span>
+                    <span class="detail-value" th:text="${reservation.minors}">0</span>
+                </div>
+                
+                <div th:if="${reservation.reducedMobility > 0}" class="detail-row">
+                    <span class="detail-label">Movilidad Reducida:</span>
+                    <span class="detail-value" th:text="${reservation.reducedMobility}">0</span>
+                </div>
+                
+                <div th:if="${reservation.visitorType.name() == 'EDUCATIONAL_INSTITUTION' and reservation.institutionName != null}" class="detail-row">
+                    <span class="detail-label">Institución:</span>
+                    <span class="detail-value" th:text="${reservation.institutionName}">Institución</span>
+                </div>
+                
+                <div th:if="${reservation.originLocation != null}" class="detail-row">
+                    <span class="detail-label">Lugar de Origen:</span>
+                    <span class="detail-value" th:text="${reservation.originLocation}">Origen</span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>⚠️ Información sobre la Cancelación</h3>
+                <ul>
+                    <li>Tu reserva ha sido cancelada y ya no está activa.</li>
+                    <li>No necesitas presentarte el día programado de la visita.</li>
+                    <li>Si tienes alguna consulta sobre esta cancelación, contáctanos.</li>
+                    <li>Si deseas realizar una nueva reserva, puedes hacerlo desde nuestro sitio web.</li>
+                </ul>
+            </div>
+            
+            <div class="contact-box">
+                <h3>🔄 ¿Quieres realizar una nueva reserva?</h3>
+                <p>Si cambiaste de opinión y quieres visitar el Lago Escondido en otra fecha, 
+                puedes realizar una nueva reserva visitando nuestro sitio web o contactándonos directamente.</p>
+            </div>
+            
+            <div th:if="${reservation.comment != null and !#strings.isEmpty(reservation.comment)}" class="info-box">
+                <h3>💬 Comentarios de tu reserva</h3>
+                <p th:text="${reservation.comment}">Comentarios del visitante</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Lago Escondido</strong></p>
+            <p>📧 <a href="mailto:info@lago-escondido.com">info@lago-escondido.com</a></p>
+            <p>📞 +54 9 351 XXX-XXXX</p>
+            <p>🌐 <a href="https://lago-escondido.com">lago-escondido.com</a></p>
+            <p style="margin-top: 20px; font-size: 12px; color: #adb5bd;">
+                Este es un email automático, por favor no respondas a este mensaje.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

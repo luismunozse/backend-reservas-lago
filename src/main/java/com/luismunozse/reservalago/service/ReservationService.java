@@ -12,8 +12,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,7 +27,7 @@ public class ReservationService {
 
     private final ReservationRepository reservations;
     private final AvailabilityRuleRepository availability;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
 
     @Value("${app.defaultCapacity:30}")
     private int defaultCapacity;
@@ -83,7 +81,8 @@ public class ReservationService {
 
         reservations.save(r);
 
-        sendEmail(r.getEmail(), "Reserva recibida", "Tu reserva fue registrada. Te recordaremos 48h antes.");
+        // Enviar email de confirmación
+        emailService.sendReservationConfirmation(r);
         return r.getId();
     }
 
@@ -92,19 +91,9 @@ public class ReservationService {
         LocalDate in48h = LocalDate.now().plusDays(2);
         List<Reservation> list = reservations.findAllByVisitDateAndStatus(in48h, ReservationStatus.PENDING);
         for (Reservation r : list) {
-            sendEmail(r.getEmail(), "Recordatorio de visita", "¡Te esperamos! Llegá 15 min antes…");
+            // TODO: Crear template específico para recordatorios
+            emailService.sendReservationConfirmation(r);
         }
-    }
-
-
-    private void sendEmail(String to, String subject, String body) {
-        try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(to);
-            msg.setSubject(subject);
-            msg.setText(body);
-            mailSender.send(msg);
-        } catch (Exception ignored) { }
     }
 
     // ==== Exportación CSV ====
@@ -248,6 +237,46 @@ public class ReservationService {
                 .toList();
     }
 
+
+    @Transactional
+    public void confirmReservation(UUID id) {
+        Reservation reservation = reservations.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
+        reservation.setStatus(ReservationStatus.CONFIRMED);
+        reservations.save(reservation);
+        
+        // Enviar email de confirmación actualizada
+        emailService.sendReservationConfirmation(reservation);
+    }
+
+    @Transactional
+    public void cancelReservation(UUID id) {
+        Reservation reservation = reservations.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservations.save(reservation);
+        
+        // Enviar email de cancelación
+        emailService.sendReservationCancellation(reservation);
+    }
+
+    public List<Map<String, Object>> availabilityForMonth(LocalDate month) {
+        LocalDate firstDay = month.withDayOfMonth(1);
+        LocalDate lastDay = month.withDayOfMonth(month.lengthOfMonth());
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        for (LocalDate date = firstDay; !date.isAfter(lastDay); date = date.plusDays(1)) {
+            Map<String, Object> dayAvailability = availabilityFor(date);
+            Map<String, Object> formatted = new HashMap<>();
+            formatted.put("availableDate", date.toString());
+            formatted.put("totalCapacity", dayAvailability.get("capacity"));
+            formatted.put("remainingCapacity", dayAvailability.get("remaining"));
+            result.add(formatted);
+        }
+        
+        return result;
+    }
 
     private AdminReservationDTO toAdminDTO(Reservation r) {
         return new AdminReservationDTO(

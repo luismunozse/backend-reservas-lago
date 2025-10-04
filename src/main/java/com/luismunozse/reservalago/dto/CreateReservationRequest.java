@@ -4,7 +4,6 @@ import com.luismunozse.reservalago.model.Circuit;
 import com.luismunozse.reservalago.model.HowHeard;
 import com.luismunozse.reservalago.model.VisitorType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 

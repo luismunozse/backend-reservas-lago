@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/lago
+    url: jdbc:postgresql://localhost:5434/lago
     username: postgres
     password: postgres
   jpa:
@@ -12,10 +12,19 @@ spring:
   flyway:
     enabled: true
   mail:
-    host: localhost
-    port: 1025   # MailHog SMTP
-    username: ""
-    password: ""
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}   # MailHog SMTP para desarrollo
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:false}
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
   jackson:
     time-zone: UTC
   task:
@@ -27,6 +36,10 @@ app:
   admin:
     username: admin
     password: admin123
+  mail:
+    from: ${APP_MAIL_FROM:noreply@lago-escondido.com}
+    fromName: ${APP_MAIL_FROM_NAME:Lago Escondido}
+    enabled: ${APP_MAIL_ENABLED:true}
 
 server:
   port: 8080

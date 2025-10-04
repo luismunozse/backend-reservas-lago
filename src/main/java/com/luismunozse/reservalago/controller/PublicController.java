@@ -2,7 +2,6 @@ package com.luismunozse.reservalago.controller;
 
 import com.luismunozse.reservalago.dto.CreateReservationRequest;
 import com.luismunozse.reservalago.dto.ReservationSummaryDTO;
-import com.luismunozse.reservalago.model.Reservation;
 import com.luismunozse.reservalago.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,9 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -28,8 +27,19 @@ public class PublicController {
 
     @Operation(summary = "Disponibilidad por dia")
     @GetMapping("/availability")
-    public Map<String, Object> availability(@RequestParam LocalDate date) {
-        return service.availabilityFor(date);
+    public Object availability(
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) String month) {
+        
+        if (month != null && !month.isEmpty()) {
+            // Convertir formato YYYY-MM a LocalDate (primer día del mes)
+            LocalDate monthDate = LocalDate.parse(month + "-01");
+            return service.availabilityForMonth(monthDate);
+        } else if (date != null) {
+            return service.availabilityFor(date);
+        } else {
+            throw new IllegalArgumentException("Debe proporcionar 'date' o 'month'");
+        }
     }
 
     @Operation(summary = "Crear una reserva")
