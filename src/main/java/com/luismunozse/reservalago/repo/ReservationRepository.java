@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
     @Query("""
-        select coalesce(sum(r.adults14Plus + r.minors), 0)
+        select coalesce(sum(r.adults18Plus + r.children2To17 + r.babiesLessThan2), 0)
         from Reservation r
         where r.visitDate = :date and r.status <> 'CANCELLED'
         """)

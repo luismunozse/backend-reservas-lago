@@ -34,14 +34,16 @@ public class Reservation {
     // Datos opcionales si es institución educativa
     private String institutionName;
     private Integer institutionStudents;
-    @Column(name = "adults_14_plus")
-    private int adults14Plus;
-    @Column(nullable = false)
-    private int minors;
+    @Column(name = "adults_18_plus")
+    private int adults18Plus;
+    @Column(name="children_2_to_17")
+    private int children2To17;
+    @Column(name="babies_less_than_2")
+    private int babiesLessThan2;
     @Column(nullable = false)
     private int reducedMobility;
     @Column(nullable = false)
-    private boolean allergies;
+    private int allergies;
     @Column(columnDefinition = "text")
     private String comment;
     @Column(columnDefinition = "text")

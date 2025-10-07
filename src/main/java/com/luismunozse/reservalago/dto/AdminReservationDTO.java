@@ -12,8 +12,9 @@ public record AdminReservationDTO(
         LocalDate visitDate,
         String firstName,
         String lastName,
-        int adults14Plus,
-        int minors,
+        int adults18Plus,
+        int children2To17,
+        int babiesLessThan2,
         String email,
         String phone,
         String circuit,       // A/B/C/D

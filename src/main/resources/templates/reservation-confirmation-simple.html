@@ -23,8 +23,9 @@
             <p><strong>Fecha de Visita:</strong> <span th:text="${#temporals.format(reservation.visitDate, 'dd/MM/yyyy')}">Fecha</span></p>
             <p><strong>Tipo de Visita:</strong> <span th:text="${visitorTypeText}">Tipo</span></p>
             <p><strong>Circuito:</strong> <span th:text="${circuitText}">Circuito</span></p>
-            <p><strong>Adultos (14+ años):</strong> <span th:text="${reservation.adults14Plus}">0</span></p>
-            <p><strong>Menores:</strong> <span th:text="${reservation.minors}">0</span></p>
+            <p><strong>Adultos (14+ años):</strong> <span th:text="${reservation.adults18Plus}">0</span></p>
+            <p><strong>Menores:</strong> <span th:text="${reservation.children2To17}">0</span></p>
+            <p><strong>Bebés:</strong> <span th:text="${reservation.babiesLessThan2}">0</span></p>
             
             <div th:if="${reservation.reducedMobility > 0}">
                 <p><strong>Movilidad Reducida:</strong> <span th:text="${reservation.reducedMobility}">0</span></p>
@@ -50,7 +51,7 @@
                 <li><strong>Estado Pendiente:</strong> Tu reserva está siendo procesada. Recibirás una confirmación definitiva próximamente.</li>
                 <li><strong>Horario de Visita:</strong> Consulta los horarios disponibles en nuestro sitio web.</li>
                 <li><strong>Requisitos:</strong> Presenta este email y un documento de identidad el día de tu visita.</li>
-                <li th:if="${reservation.allergies}"><strong>Alergias:</strong> Hemos registrado que tienes alergias. Por favor, contacta con nosotros si necesitas información adicional.</li>
+                <li th:if="${reservation.allergies > 0}"><strong>Alergias:</strong> Hemos registrado que <span th:text="${reservation.allergies}">0</span> persona(s) en tu grupo tienen alergias. Por favor, contacta con nosotros si necesitas información adicional.</li>
             </ul>
         </div>
         
@@ -72,3 +73,4 @@
     
 </body>
 </html>
+

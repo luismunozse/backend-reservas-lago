@@ -8,29 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
 @Schema(description = "Solicitud de creación de reserva")
-//public record CreateReservationRequest(
-//        @NotNull @FutureOrPresent LocalDate visitDate,
-//        @NotBlank String firstName,
-//        @NotBlank String lastName,
-//        @NotBlank String dni,
-//        @NotBlank String phone,
-//        @Email @NotBlank String email,
-//        @NotNull Circuit circuit,
-//        @NotNull VisitorType visitorType,
-//        String institutionName,
-//        @Min(0) Integer institutionStudents,
-//        @Min(1) int adults14Plus,
-//        @Min(0) int minors,
-//        @Min(0) int reducedMobility,
-//        boolean allergies,
-//        String comment,
-//        @NotBlank String originLocation,
-//        @NotNull HowHeard howHeard,
-//        @AssertTrue boolean acceptedPolicies
-//) {
-//
-//
-//}
 public record CreateReservationRequest(
         @Schema(example = "2025-09-02") LocalDate visitDate,
         @Schema(example = "Luis") String firstName,
@@ -42,10 +19,11 @@ public record CreateReservationRequest(
         @Schema(example = "INDIVIDUAL", allowableValues = {"INDIVIDUAL","EDUCATIONAL_INSTITUTION"}) VisitorType visitorType,
         @Schema(example = "Escuela Técnica N°1") String institutionName,
         @Schema(example = "25") Integer institutionStudents,
-        @Schema(example = "1") int adults14Plus,
-        @Schema(example = "0") int minors,
+        @Schema(example = "1") int adults18Plus,
+        @Schema(example = "0") int children2To17,
+        @Schema(example = "0") int babiesLessThan2,
         @Schema(example = "0") int reducedMobility,
-        @Schema(example = "false") boolean allergies,
+        @Schema(example = "0") int allergies,
         @Schema(example = "—") String comment,
         @Schema(example = "Córdoba, AR") String originLocation,
         @Schema(example = "ADS", allowableValues = {"SOCIAL","RECOMMENDATION","WEBSITE","ADS","OTHER"}) HowHeard howHeard,

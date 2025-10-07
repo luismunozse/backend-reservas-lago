@@ -104,3 +104,4 @@ cors:
   allowed-headers: "*"
   allow-credentials: true
   max-age: 3600
+

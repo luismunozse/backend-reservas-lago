@@ -129,3 +129,5 @@ echo "   • Reiniciar: docker-compose -f docker-compose.prod.yml restart"
 echo "   • Estado: docker-compose -f docker-compose.prod.yml ps"
 echo ""
 success "¡El backend está listo para producción! 🚀"
+
+

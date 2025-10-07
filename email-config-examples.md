@@ -153,3 +153,4 @@ curl -X POST http://localhost:8080/api/reservations \
 - Revisar carpeta de spam
 - Verificar que `APP_MAIL_ENABLED=true`
 - Revisar logs del servidor
+

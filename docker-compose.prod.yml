@@ -108,3 +108,4 @@ volumes:
 networks:
   lago-network:
     driver: bridge
+

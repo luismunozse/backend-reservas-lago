@@ -36,10 +36,11 @@ public class EmailTestController {
         testReservation.setEmail("juan.perez@example.com");
         testReservation.setCircuit(Circuit.A);
         testReservation.setVisitorType(VisitorType.INDIVIDUAL);
-        testReservation.setAdults14Plus(2);
-        testReservation.setMinors(1);
+        testReservation.setAdults18Plus(2);
+        testReservation.setChildren2To17(1);
+        testReservation.setBabiesLessThan2(0);
         testReservation.setReducedMobility(0);
-        testReservation.setAllergies(false);
+        testReservation.setAllergies(0);
         testReservation.setComment("Esta es una reserva de prueba");
         testReservation.setOriginLocation("Córdoba, AR");
         testReservation.setHowHeard(HowHeard.WEBSITE);
@@ -71,10 +72,11 @@ public class EmailTestController {
             testReservation.setEmail(email);
             testReservation.setCircuit(Circuit.B);
             testReservation.setVisitorType(VisitorType.INDIVIDUAL);
-            testReservation.setAdults14Plus(1);
-            testReservation.setMinors(0);
+            testReservation.setAdults18Plus(1);
+            testReservation.setChildren2To17(0);
+            testReservation.setBabiesLessThan2(0);
             testReservation.setReducedMobility(0);
-            testReservation.setAllergies(false);
+            testReservation.setAllergies(0);
             testReservation.setComment("Email de prueba enviado desde la API");
             testReservation.setOriginLocation("Buenos Aires, AR");
             testReservation.setHowHeard(HowHeard.RECOMMENDATION);
@@ -116,8 +118,9 @@ public class EmailTestController {
                         <p><strong>Fecha de Visita:</strong> %s</p>
                         <p><strong>Tipo de Visita:</strong> Individual</p>
                         <p><strong>Circuito:</strong> %s</p>
-                        <p><strong>Adultos (14+ años):</strong> %d</p>
-                        <p><strong>Menores:</strong> %d</p>
+                        <p><strong>Adultos (18+ años):</strong> %d</p>
+                        <p><strong>Niños (2-17 años):</strong> %d</p>
+                        <p><strong>Bebés (&lt;2 años):</strong> %d</p>
                         <p><strong>Estado:</strong> <span style="background-color: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px;">PENDIENTE</span></p>
                         <p><strong>Lugar de Origen:</strong> %s</p>
                     </div>
@@ -154,10 +157,12 @@ public class EmailTestController {
                 reservation.getId(),
                 reservation.getVisitDate(),
                 reservation.getCircuit(),
-                reservation.getAdults14Plus(),
-                reservation.getMinors(),
+                reservation.getAdults18Plus(),
+                reservation.getChildren2To17(),
+                reservation.getBabiesLessThan2(),
                 reservation.getOriginLocation(),
                 reservation.getComment()
             );
     }
 }
+

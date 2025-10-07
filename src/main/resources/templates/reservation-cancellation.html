@@ -160,12 +160,17 @@
                 
                 <div class="detail-row">
                     <span class="detail-label">Adultos (14+ años):</span>
-                    <span class="detail-value" th:text="${reservation.adults14Plus}">0</span>
+                    <span class="detail-value" th:text="${reservation.adults18Plus}">0</span>
                 </div>
                 
                 <div class="detail-row">
                     <span class="detail-label">Menores:</span>
-                    <span class="detail-value" th:text="${reservation.minors}">0</span>
+                    <span class="detail-value" th:text="${reservation.children2To17}">0</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Bebés:</span>
+                    <span class="detail-value" th:text="${reservation.babiesLessThan2}">0</span>
                 </div>
                 
                 <div th:if="${reservation.reducedMobility > 0}" class="detail-row">

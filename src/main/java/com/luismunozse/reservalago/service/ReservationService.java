@@ -48,7 +48,7 @@ public class ReservationService {
     public UUID create(CreateReservationRequest req) {
         int capacity = (int) availabilityFor(req.visitDate()).get("capacity");
         int used = reservations.totalPeopleForDate(req.visitDate());
-        int requested = req.adults14Plus() + req.minors();
+        int requested = req.adults18Plus() + req.children2To17() + req.babiesLessThan2();
         if (used + requested > capacity) {
             throw new IllegalStateException("No hay cupo para esa fecha");
         }
@@ -69,8 +69,9 @@ public class ReservationService {
         r.setVisitorType(req.visitorType());
         r.setInstitutionName(req.institutionName());
         r.setInstitutionStudents(req.institutionStudents());
-        r.setAdults14Plus(req.adults14Plus());
-        r.setMinors(req.minors());
+        r.setAdults18Plus(req.adults18Plus());
+        r.setChildren2To17(req.children2To17());
+        r.setBabiesLessThan2(req.babiesLessThan2());
         r.setReducedMobility(req.reducedMobility());
         r.setAllergies(req.allergies());
         r.setComment(req.comment());
@@ -96,59 +97,6 @@ public class ReservationService {
         }
     }
 
-    // ==== Exportación CSV ====
-//    public byte[] exportCsv(LocalDate date, ReservationStatus status, VisitorType visitorType, boolean maskContacts) {
-//        List<Reservation> list = reservations.findAllByVisitDate(date);
-//        if (status != null) {
-//            list = list.stream().filter(r -> r.getStatus() == status).collect(Collectors.toList());
-//        }
-//        if (visitorType != null) {
-//            list = list.stream().filter(r -> r.getVisitorType() == visitorType).collect(Collectors.toList());
-//        }
-//        String header = String.join(",",
-//                "id","visit_date","first_name","last_name","dni","phone","email",
-//                "circuit","visitor_type","institution_name","institution_students",
-//                "adults_14_plus","minors","reduced_mobility","allergies",
-//                "origin_location","how_heard","status","created_at","updated_at");
-//
-//
-//        String rows = list.stream().map(r -> String.join(",",
-//                q(r.getId() != null ? r.getId().toString() : ""),
-//                q(r.getVisitDate() != null ? r.getVisitDate().toString() : ""),
-//                q(r.getFirstName()),
-//                q(r.getLastName()),
-//                q(maskContacts ? mask(r.getDni()) : n(r.getDni())),
-//                q(maskContacts ? mask(r.getPhone()) : n(r.getPhone())),
-//                q(maskContacts ? mask(r.getEmail()) : n(r.getEmail())),
-//                q(r.getCircuit() != null ? r.getCircuit().name() : ""),
-//                q(r.getVisitorType() != null ? r.getVisitorType().name() : ""),
-//                q(n(r.getInstitutionName())),
-//                q(r.getInstitutionStudents() != null ? String.valueOf(r.getInstitutionStudents()) : ""),
-//                q(String.valueOf(r.getAdults14Plus())),
-//                q(String.valueOf(r.getMinors())),
-//                q(String.valueOf(r.getReducedMobility())),
-//                q(String.valueOf(r.isAllergies())),
-//                q(n(r.getOriginLocation())),
-//                q(r.getHowHeard() != null ? r.getHowHeard().name() : ""),
-//                q(r.getStatus() != null ? r.getStatus().name() : ""),
-//                q(r.getCreatedAt() != null ? r.getCreatedAt().toString() : ""),
-//                q(r.getUpdatedAt() != null ? r.getUpdatedAt().toString() : ""))).collect(Collectors.joining(""));
-//
-//        String csv = "•" + header + " " + rows + (rows.isEmpty() ? "" : " ");
-//        return csv.getBytes(StandardCharsets.UTF_8);
-//    }
-//
-//
-//    private static String n(String s) { return s == null ? "" : s; }
-//    private static String q(String s) {
-//        String v = n(s).replace("\"", "\"\"");
-//        return "\"" + v + "\"";
-//    }
-//    private static String mask(String s) {
-//        if (s == null || s.length() < 4) return "***";
-//        int keep = Math.min(3, s.length());
-//        return "***" + s.substring(s.length() - keep);
-//    }
 
     public byte[] exportCsv(LocalDate date, ReservationStatus status, VisitorType visitorType, boolean maskContacts) {
         List<Reservation> list = reservations.findAllByVisitDate(date);
@@ -165,7 +113,7 @@ public class ReservationService {
         String header = String.join(SEP,
                 "id","visit_date","first_name","last_name","dni","phone","email",
                 "visitor_type","institution_name","institution_students",
-                "adults_14_plus","minors","reduced_mobility","allergies",
+                "adults_18_plus","children_2_to_17","babies_less_than_2","reduced_mobility","allergies",
                 "origin_location","how_heard","status","created_at","updated_at");
 
         StringBuilder sb = new StringBuilder();
@@ -185,10 +133,11 @@ public class ReservationService {
                     q(r.getVisitorType() != null ? r.getVisitorType().name() : ""),
                     q(n(r.getInstitutionName())),
                     q(r.getInstitutionStudents() != null ? String.valueOf(r.getInstitutionStudents()) : ""),
-                    q(String.valueOf(r.getAdults14Plus())),
-                    q(String.valueOf(r.getMinors())),
+                    q(String.valueOf(r.getAdults18Plus())),
+                    q(String.valueOf(r.getChildren2To17())),
+                    q(String.valueOf(r.getBabiesLessThan2())),
                     q(String.valueOf(r.getReducedMobility())),
-                    q(String.valueOf(r.isAllergies())),
+                    q(String.valueOf(r.getAllergies())),
                     q(n(r.getOriginLocation())),
                     q(r.getHowHeard() != null ? r.getHowHeard().name() : ""),
                     q(r.getStatus() != null ? r.getStatus().name() : ""),
@@ -284,15 +233,16 @@ public class ReservationService {
                 r.getVisitDate(),
                 r.getFirstName(),
                 r.getLastName(),
-                r.getAdults14Plus(),
-                r.getMinors(),
+                r.getAdults18Plus(),
+                r.getChildren2To17(),
+                r.getBabiesLessThan2(),
                 r.getEmail(),
                 r.getPhone(),
                 r.getCircuit() != null ? r.getCircuit().name() : null,
                 r.getVisitorType() != null ? r.getVisitorType().name() : null,
                 r.getOriginLocation(),
                 r.getStatus() != null ? r.getStatus().name() : null,
-                r.getCreatedAt() // LocalDateTime en el DTO
+                r.getCreatedAt() 
         );
     }
 
