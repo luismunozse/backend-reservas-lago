@@ -43,9 +43,9 @@ spring:
 
 app:
   defaultCapacity: ${DEFAULT_CAPACITY:30}
-  admin:
-    username: ${ADMIN_USERNAME:admin}
-    password: ${ADMIN_PASSWORD}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:86400000}
   mail:
     from: ${APP_MAIL_FROM}
     fromName: ${APP_MAIL_FROM_NAME:Lago Escondido}

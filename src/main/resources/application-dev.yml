@@ -35,9 +35,9 @@ spring:
 
 app:
   defaultCapacity: 30
-  admin:
-    username: admin
-    password: admin123
+  jwt:
+    secret: ${JWT_SECRET:lagoEscondidoSecretKeyForJWT2025MustBeAtLeast32CharactersLong}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 horas en milisegundos
   mail:
     from: ${APP_MAIL_FROM:noreply@lago-escondido.com}
     fromName: ${APP_MAIL_FROM_NAME:Lago Escondido}

@@ -26,3 +26,4 @@ ALTER DATABASE lago_prod SET log_min_duration_statement TO 1000;
 COMMENT ON DATABASE lago_prod IS 'Base de datos de producción para el sistema de reservas del Lago Escondido';
 
 
+
