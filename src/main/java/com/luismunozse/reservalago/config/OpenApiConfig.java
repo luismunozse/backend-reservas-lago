@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
                         
                         ## Autenticación
                         Los endpoints de administración requieren autenticación básica:
-                        - Usuario: `admin`
+                        - Usuario: `admin@lago-escondido.com`
                         - Contraseña: `admin123`
                         
                         ## Estados de Reserva

@@ -28,7 +28,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            // Autenticar con username/password
+            // Autenticar con email/password
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
@@ -62,3 +62,5 @@ public class AuthController {
     // Clase interna para respuestas de error
     private record ErrorResponse(String message) {}
 }
+
+
