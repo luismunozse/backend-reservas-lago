@@ -1,6 +1,7 @@
 package com.luismunozse.reservalago.controller;
 
 import com.luismunozse.reservalago.dto.AdminReservationDTO;
+import com.luismunozse.reservalago.dto.CreateEventRequest;
 import com.luismunozse.reservalago.model.AvailabilityRule;
 import com.luismunozse.reservalago.model.ReservationStatus;
 import com.luismunozse.reservalago.model.VisitorType;
@@ -75,5 +76,12 @@ public class AdminController {
     @PostMapping("/reservations/{id}/cancel")
     public void cancelReservation(@PathVariable java.util.UUID id) {
         reservationService.cancelReservation(id);
+    }
+
+    @Operation(summary = "Crear un evento (reserva tipo EVENT)")
+    @PostMapping("/eventos")
+    public Map<String, String> createEvent(@RequestBody CreateEventRequest req) {
+        java.util.UUID id = reservationService.createEvent(req);
+        return Map.of("id", id.toString());
     }
 }

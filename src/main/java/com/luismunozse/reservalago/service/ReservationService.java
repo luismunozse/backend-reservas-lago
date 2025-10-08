@@ -1,6 +1,7 @@
 package com.luismunozse.reservalago.service;
 
 import com.luismunozse.reservalago.dto.AdminReservationDTO;
+import com.luismunozse.reservalago.dto.CreateEventRequest;
 import com.luismunozse.reservalago.dto.CreateReservationRequest;
 import com.luismunozse.reservalago.model.AvailabilityRule;
 import com.luismunozse.reservalago.model.Reservation;
@@ -84,6 +85,58 @@ public class ReservationService {
 
         // Enviar email de confirmación
         emailService.sendReservationConfirmation(r);
+        return r.getId();
+    }
+
+    @Transactional
+    public UUID createEvent(CreateEventRequest req) {
+        // Convertir Instant a LocalDate para la fecha de visita
+        LocalDate visitDate = req.fechaISO().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+        // Crear reserva de tipo evento
+        Reservation r = new Reservation();
+        r.setVisitDate(visitDate);
+        r.setVisitorType(VisitorType.EVENT);
+
+        // Usar el título como firstName y "Evento" como lastName
+        r.setFirstName(req.titulo() != null ? req.titulo() : "Evento");
+        r.setLastName("Evento");
+
+        // Campos obligatorios con valores por defecto para eventos
+        r.setDni("00000000");
+        r.setPhone("0000000000");
+        r.setEmail("evento@reservalago.com");
+
+        // Circuit opcional
+        if (req.circuito() != null && !req.circuito().isBlank()) {
+            try {
+                r.setCircuit(com.luismunozse.reservalago.model.Circuit.valueOf(req.circuito()));
+            } catch (IllegalArgumentException e) {
+                // Si el circuito no es válido, usar A por defecto
+                r.setCircuit(com.luismunozse.reservalago.model.Circuit.A);
+            }
+        } else {
+            r.setCircuit(com.luismunozse.reservalago.model.Circuit.A);
+        }
+
+        // Cupo (personas)
+        int cupo = req.cupo() != null ? req.cupo() : 0;
+        r.setAdults18Plus(cupo);
+        r.setChildren2To17(0);
+        r.setBabiesLessThan2(0);
+
+        // Notas en el campo comment
+        r.setComment(req.notas());
+
+        // Campos por defecto para eventos
+        r.setReducedMobility(0);
+        r.setAllergies(0);
+        r.setOriginLocation("N/A");
+        r.setHowHeard(com.luismunozse.reservalago.model.HowHeard.OTHER);
+        r.setAcceptedPolicies(true);
+        r.setStatus(ReservationStatus.CONFIRMED); // Los eventos se crean confirmados
+
+        reservations.save(r);
         return r.getId();
     }
 

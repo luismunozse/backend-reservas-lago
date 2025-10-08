@@ -143,6 +143,7 @@ public class EmailService {
         return switch (visitorType) {
             case INDIVIDUAL -> "Individual";
             case EDUCATIONAL_INSTITUTION -> "Institución Educativa";
+            case EVENT -> "Evento";
         };
     }
 
