@@ -16,3 +16,4 @@ ALTER TABLE users
 
 -- Crear índice para búsquedas por nombre
 CREATE INDEX IF NOT EXISTS idx_users_names ON users(first_name, last_name);
+

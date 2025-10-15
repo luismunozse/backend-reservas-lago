@@ -21,3 +21,4 @@ public class UpdateUserRequest {
     
     private Boolean enabled;
 }
+

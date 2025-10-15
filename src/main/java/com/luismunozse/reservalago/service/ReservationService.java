@@ -29,6 +29,7 @@ public class ReservationService {
     private final ReservationRepository reservations;
     private final AvailabilityRuleRepository availability;
     private final EmailService emailService;
+    private final SystemConfigService systemConfigService;
 
     @Value("${app.defaultCapacity:30}")
     private int defaultCapacity;
@@ -54,6 +55,11 @@ public class ReservationService {
             throw new IllegalStateException("No hay cupo para esa fecha");
         }
         if (req.visitorType() == VisitorType.EDUCATIONAL_INSTITUTION) {
+            // Verificar si las reservas para instituciones educativas están habilitadas
+            if (!systemConfigService.isEducationalReservationsEnabled()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Las reservas para instituciones educativas no están habilitadas en este momento");
+            }
             if (req.institutionName() == null || req.institutionName().isBlank()) {
                 throw new IllegalArgumentException("Para instituciones, 'institutionName' es obligatorio");
             }

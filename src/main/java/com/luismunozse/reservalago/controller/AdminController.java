@@ -7,6 +7,7 @@ import com.luismunozse.reservalago.model.ReservationStatus;
 import com.luismunozse.reservalago.model.VisitorType;
 import com.luismunozse.reservalago.repo.AvailabilityRuleRepository;
 import com.luismunozse.reservalago.service.ReservationService;
+import com.luismunozse.reservalago.service.SystemConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class AdminController {
 
     private final AvailabilityRuleRepository availability;
     private final ReservationService reservationService;
+    private final SystemConfigService systemConfigService;
 
     @Operation(summary = "Upsert de capacidad por dia")
     @PutMapping("/availability/{date}")
@@ -83,5 +85,20 @@ public class AdminController {
     public Map<String, String> createEvent(@RequestBody CreateEventRequest req) {
         java.util.UUID id = reservationService.createEvent(req);
         return Map.of("id", id.toString());
+    }
+
+    @Operation(summary = "Obtener estado de reservas para instituciones educativas")
+    @GetMapping("/config/educational-reservations")
+    public Map<String, Boolean> getEducationalReservationsStatus() {
+        boolean enabled = systemConfigService.isEducationalReservationsEnabled();
+        return Map.of("enabled", enabled);
+    }
+
+    @Operation(summary = "Habilitar/deshabilitar reservas para instituciones educativas")
+    @PutMapping("/config/educational-reservations")
+    public Map<String, Boolean> toggleEducationalReservations(@RequestBody Map<String, Boolean> body) {
+        boolean enabled = body.getOrDefault("enabled", true);
+        systemConfigService.setEducationalReservationsEnabled(enabled);
+        return Map.of("enabled", enabled);
     }
 }
