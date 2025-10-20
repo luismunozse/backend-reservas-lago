@@ -48,6 +48,9 @@ public class ReservationService {
 
     @Transactional
     public UUID create(CreateReservationRequest req) {
+        // Normalizar DNI (opcional pero recomendado)
+        String dni = req.dni() != null ? req.dni().trim().replace(".", "").replace("-", "") : null;
+
         int capacity = (int) availabilityFor(req.visitDate()).get("capacity");
         int used = reservations.totalPeopleForDate(req.visitDate());
         int requested = req.adults18Plus() + req.children2To17() + req.babiesLessThan2();
@@ -65,11 +68,18 @@ public class ReservationService {
             }
         }
 
+        // ✅ Pre-chequeo de duplicado (fecha + DNI, excluyendo canceladas)
+        if (dni != null && reservations.existsByVisitDateAndDniAndStatusNot(
+                req.visitDate(), dni, ReservationStatus.CANCELLED)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe una reserva para ese DNI en esa fecha.");
+        }
+
         Reservation r = new Reservation();
         r.setVisitDate(req.visitDate());
         r.setFirstName(req.firstName());
         r.setLastName(req.lastName());
-        r.setDni(req.dni());
+        r.setDni(dni);            // usar normalizado
         r.setPhone(req.phone());
         r.setEmail(req.email());
         r.setCircuit(req.circuit());
@@ -87,9 +97,21 @@ public class ReservationService {
         r.setAcceptedPolicies(req.acceptedPolicies());
         r.setStatus(ReservationStatus.PENDING);
 
+        try {
         reservations.save(r);
 
         // Enviar email de confirmación
+      //  emailService.sendReservationConfirmation(r);
+       // return r.getId();
+    // }
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            String root = org.apache.commons.lang3.exception.ExceptionUtils.getRootCauseMessage(ex);
+            if (root.contains("ux_reservations_date_dni")) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Ya existe una reserva para ese DNI en esa fecha.");
+            }
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos inválidos", ex);
+        }
         emailService.sendReservationConfirmation(r);
         return r.getId();
     }

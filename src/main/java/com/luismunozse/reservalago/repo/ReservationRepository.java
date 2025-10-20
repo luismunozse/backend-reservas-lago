@@ -18,8 +18,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         """)
     int totalPeopleForDate(@Param("date") LocalDate date);
 
+    // NUEVOS: existencia por fecha + DNI (excluye canceladas)
+    boolean existsByVisitDateAndDniAndStatusNot(
+            LocalDate visitDate,
+            String dni,
+            ReservationStatus status);
+
     List<Reservation> findAllByVisitDateAndStatus(LocalDate date, ReservationStatus status);
 
     List<Reservation> findAllByVisitDate(LocalDate date);
     List<Reservation> findAllByStatus(ReservationStatus status);
 }
+
