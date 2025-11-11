@@ -21,6 +21,7 @@ public record AdminReservationDTO(
         String visitorType,   // INDIVIDUAL / EDUCATIONAL_INSTITUTION
         String originLocation,
         String status,        // PENDING / CONFIRMED / CANCELLED
-        Instant createdAt
+        Instant createdAt,
+        String dni
 ) {}
 

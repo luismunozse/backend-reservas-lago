@@ -323,7 +323,8 @@ public class ReservationService {
                 r.getVisitorType() != null ? r.getVisitorType().name() : null,
                 r.getOriginLocation(),
                 r.getStatus() != null ? r.getStatus().name() : null,
-                r.getCreatedAt() 
+                r.getCreatedAt(),
+                r.getDni()
         );
     }
 
