@@ -1,15 +1,10 @@
 package com.luismunozse.reservalago.service;
 
-import com.luismunozse.reservalago.dto.AdminReservationDTO;
-import com.luismunozse.reservalago.dto.CreateEventRequest;
-import com.luismunozse.reservalago.dto.CreateReservationRequest;
-import com.luismunozse.reservalago.model.AvailabilityRule;
-import com.luismunozse.reservalago.model.Reservation;
-import com.luismunozse.reservalago.model.ReservationStatus;
-import com.luismunozse.reservalago.model.VisitorType;
+import com.luismunozse.reservalago.dto.*;
+import com.luismunozse.reservalago.model.*;
 import com.luismunozse.reservalago.repo.AvailabilityRuleRepository;
 import com.luismunozse.reservalago.repo.ReservationRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -96,6 +91,19 @@ public class ReservationService {
         r.setHowHeard(req.howHeard());
         r.setAcceptedPolicies(req.acceptedPolicies());
         r.setStatus(ReservationStatus.PENDING);
+
+        // 👇 Nuevo: mapear visitantes
+        if (req.visitors() != null && !req.visitors().isEmpty()) {
+            for (VisitorDTO v : req.visitors()) {
+                ReservationVisitor rv = new ReservationVisitor();
+                rv.setReservation(r);
+                rv.setFirstName(v.firstName());
+                rv.setLastName(v.lastName());
+                // si querés normalizar, hacelo acá también
+                rv.setDni(v.dni() != null ? v.dni().trim().replace(".", "").replace("-", "") : "");
+                r.getVisitors().add(rv);
+            }
+        }
 
         try {
         reservations.save(r);
@@ -244,8 +252,9 @@ public class ReservationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
     }
 
+    @Transactional(readOnly = true)
     public List<AdminReservationDTO> adminList(LocalDate date, ReservationStatus status) {
-        List<com.luismunozse.reservalago.model.Reservation> list;
+        List<Reservation> list;
 
         if (date != null && status != null) {
             list = reservations.findAllByVisitDateAndStatus(date, status);
@@ -257,13 +266,11 @@ public class ReservationService {
             list = reservations.findAll();
         }
 
-        // Orden null-safe por createdAt desc
         return list.stream()
-                .sorted(Comparator.comparing(
-                        com.luismunozse.reservalago.model.Reservation::getCreatedAt,
-                        Comparator.nullsLast(Comparator.naturalOrder())
-                ).reversed())
-                .map(this::toAdminDTO)
+                .sorted(Comparator.comparing(Reservation::getCreatedAt,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .reversed())
+                .map(this::toAdminDTO)  // aquí dentro ya podés hacer r.getVisitors()
                 .toList();
     }
 
@@ -309,6 +316,16 @@ public class ReservationService {
     }
 
     private AdminReservationDTO toAdminDTO(Reservation r) {
+        java.util.List<AdminVisitorDTO> visitors = r.getVisitors() == null
+                ? java.util.List.of()
+                : r.getVisitors().stream()
+                .map(v -> new AdminVisitorDTO(
+                        v.getFirstName(),
+                        v.getLastName(),
+                        v.getDni()
+                ))
+                .toList();
+
         return new AdminReservationDTO(
                 r.getId(),
                 r.getVisitDate(),
@@ -324,7 +341,8 @@ public class ReservationService {
                 r.getOriginLocation(),
                 r.getStatus() != null ? r.getStatus().name() : null,
                 r.getCreatedAt(),
-                r.getDni()
+                r.getDni(),
+                visitors
         );
     }
 

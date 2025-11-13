@@ -66,4 +66,8 @@ public class Reservation {
     @PreUpdate void touch() {
         this.updatedAt = Instant.now();
     }
+
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<ReservationVisitor> visitors = new java.util.ArrayList<>();
+
 }

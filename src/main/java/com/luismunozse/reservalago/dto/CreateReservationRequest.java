@@ -27,5 +27,8 @@ public record CreateReservationRequest(
         @Schema(example = "—") String comment,
         @Schema(example = "Córdoba, AR") String originLocation,
         @Schema(example = "ADS", allowableValues = {"SOCIAL","RECOMMENDATION","WEBSITE","ADS","OTHER"}) HowHeard howHeard,
-        @Schema(example = "true") boolean acceptedPolicies
+        @Schema(example = "true") boolean acceptedPolicies,
+
+        @Schema(description = "Listado de visitantes efectivamente presentes")
+        java.util.List<VisitorDTO> visitors
 ) {}
