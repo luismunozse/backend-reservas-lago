@@ -4,6 +4,11 @@ import com.luismunozse.reservalago.dto.LoginRequest;
 import com.luismunozse.reservalago.dto.LoginResponse;
 import com.luismunozse.reservalago.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +33,28 @@ public class AuthController {
     private final JwtService jwtService;
 
     @Operation(summary = "Login de usuario admin", description = "Autenticación con email y contraseña, retorna JWT token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login exitoso",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                      "username": "admin@lago-escondido.com",
+                                      "role": "ROLE_ADMIN"
+                                    }
+                                    """))),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    { "message": "Credenciales inválidas" }
+                                    """))),
+            @ApiResponse(responseCode = "500", description = "Error interno en el servidor",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    { "message": "Error en el servidor" }
+                                    """)))
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {

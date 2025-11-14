@@ -5,6 +5,11 @@ import com.luismunozse.reservalago.dto.UpdateUserRequest;
 import com.luismunozse.reservalago.dto.UserResponse;
 import com.luismunozse.reservalago.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,6 +33,16 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Crear nuevo usuario administrador", 
                description = "Crea un nuevo usuario con rol de administrador en el sistema")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario creado correctamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya registrado",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    { "error": "El email ya está en uso" }
+                                    """)))
+    })
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         try {
             UserResponse response = userService.createUser(request);
@@ -40,6 +55,13 @@ public class UserController {
     @GetMapping
     @Operation(summary = "Listar todos los usuarios", 
                description = "Obtiene la lista completa de usuarios del sistema")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listado de usuarios",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "401", description = "No autenticado"),
+            @ApiResponse(responseCode = "403", description = "Sin permisos para administrar usuarios")
+    })
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
@@ -48,6 +70,12 @@ public class UserController {
     @GetMapping("/{email}")
     @Operation(summary = "Obtener usuario por email", 
                description = "Obtiene los detalles de un usuario específico por su email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
         try {
             UserResponse user = userService.getUserByEmail(email);
@@ -60,6 +88,13 @@ public class UserController {
     @PutMapping("/{userId}")
     @Operation(summary = "Actualizar usuario", 
                description = "Actualiza los datos de un usuario existente. Solo se actualizan los campos enviados.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable UUID userId,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -74,6 +109,10 @@ public class UserController {
     @DeleteMapping("/{userId}")
     @Operation(summary = "Eliminar usuario", 
                description = "Elimina un usuario del sistema de forma permanente")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Usuario eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
         try {
             userService.deleteUser(userId);

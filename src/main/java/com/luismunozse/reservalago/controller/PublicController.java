@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.UUID;
 
-@Tag(name = "Público")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -36,7 +34,8 @@ public class PublicController {
 
     @Operation(
             summary = "Disponibilidad",
-            description = "Consulta disponibilidad por día o por mes. Enviar exactamente uno de los parámetros: 'date' (YYYY-MM-DD) o 'month' (YYYY-MM)."
+            description = "Consulta disponibilidad por día o por mes. Enviar exactamente uno de los parámetros: 'date' (YYYY-MM-DD) o 'month' (YYYY-MM).",
+            tags = {"Disponibilidad"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Disponibilidad retornada",
@@ -80,7 +79,7 @@ public class PublicController {
         }
     }
 
-    @Operation(summary = "Crear una reserva")
+    @Operation(summary = "Crear una reserva", tags = {"Reservas"})
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             content = @Content(schema = @Schema(implementation = CreateReservationRequest.class))
@@ -106,7 +105,7 @@ public class PublicController {
         return Map.of("id", id.toString(), "status", "PENDING");
     }
 
-    @Operation(summary = "Obtener resumen de una reserva por ID")
+    @Operation(summary = "Obtener resumen de una reserva por ID", tags = {"Reservas"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Resumen de reserva",
                     content = @Content(mediaType = "application/json",
