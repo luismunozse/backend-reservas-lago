@@ -4,10 +4,8 @@ FROM maven:3.9.6-eclipse-temurin-21 AS build
 # Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de configuración de Maven
+# Copiar archivo de configuración de Maven
 COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
 
 # Descargar dependencias (esto se cachea si no cambia el pom.xml)
 RUN mvn dependency:go-offline -B

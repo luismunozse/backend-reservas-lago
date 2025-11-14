@@ -9,12 +9,14 @@ import com.luismunozse.reservalago.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
 
 @Tag(name = "Email Test")
+@Profile("dev")
 @RestController
 @RequestMapping("/api/test")
 @RequiredArgsConstructor

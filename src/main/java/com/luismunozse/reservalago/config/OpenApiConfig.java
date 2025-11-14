@@ -28,9 +28,17 @@ import org.springframework.context.annotation.Configuration;
                         - ✅ Gestión de capacidad por día
                         
                         ## Autenticación
-                        Los endpoints de administración requieren autenticación básica:
-                        - Usuario: `admin@lago-escondido.com`
-                        - Contraseña: `admin123`
+                        Los endpoints de administración utilizan autenticación JWT Bearer.
+                        
+                        1) Obtén un token haciendo `POST /api/auth/login` con email y contraseña.
+                        - Usuario de ejemplo (dev): `admin@lago-escondido.com`
+                        - Contraseña de ejemplo (dev): `admin123`
+                        
+                        2) Usa el token en cada request protegido:
+                        
+                        Header:
+                        
+                        `Authorization: Bearer <TU_TOKEN_JWT>`
                         
                         ## Estados de Reserva
                         - `PENDING`: Reserva pendiente de confirmación
@@ -51,7 +59,7 @@ import org.springframework.context.annotation.Configuration;
                 @Server(url = "http://localhost:8080", description = "Servidor de Desarrollo"),
                 @Server(url = "https://api.lago-escondido.com", description = "Servidor de Producción")
         },
-        security = @SecurityRequirement(name = "basicAuth"),
+        security = @SecurityRequirement(name = "bearerAuth"),
         tags = {
                 @Tag(name = "Disponibilidad", description = "Consultas de disponibilidad y capacidad"),
                 @Tag(name = "Reservas", description = "Gestión de reservas públicas"),
@@ -59,10 +67,11 @@ import org.springframework.context.annotation.Configuration;
         }
 )
 @SecurityScheme(
-        name = "basicAuth",
+        name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
-        scheme = "basic",
-        description = "Autenticación básica para endpoints administrativos"
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        description = "Autenticación Bearer JWT para endpoints administrativos"
 )
 
 @Configuration

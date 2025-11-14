@@ -10,6 +10,7 @@ import com.luismunozse.reservalago.service.ReservationService;
 import com.luismunozse.reservalago.service.SystemConfigService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 @Tag(name = "Admin")
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor

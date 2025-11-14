@@ -4,30 +4,31 @@ import com.luismunozse.reservalago.model.Circuit;
 import com.luismunozse.reservalago.model.HowHeard;
 import com.luismunozse.reservalago.model.VisitorType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
 @Schema(description = "Solicitud de creación de reserva")
 public record CreateReservationRequest(
-        @Schema(example = "2025-09-02") LocalDate visitDate,
-        @Schema(example = "Luis") String firstName,
-        @Schema(example = "Muñoz") String lastName,
-        @Schema(example = "12345678") String dni,
-        @Schema(example = "+54 9 351 000-0000") String phone,
-        @Schema(example = "luis@example.com") String email,
-        @Schema(example = "A", allowableValues = {"A","B","C","D"}) Circuit circuit,
-        @Schema(example = "INDIVIDUAL", allowableValues = {"INDIVIDUAL","EDUCATIONAL_INSTITUTION"}) VisitorType visitorType,
+        @NotNull @Schema(example = "2025-09-02") LocalDate visitDate,
+        @NotBlank @Schema(example = "Luis") String firstName,
+        @NotBlank @Schema(example = "Muñoz") String lastName,
+        @NotBlank @Schema(example = "12345678") String dni,
+        @NotBlank @Schema(example = "+54 9 351 000-0000") String phone,
+        @NotBlank @Email @Schema(example = "luis@example.com") String email,
+        @NotNull @Schema(example = "A", allowableValues = {"A","B","C","D"}) Circuit circuit,
+        @NotNull @Schema(example = "INDIVIDUAL", allowableValues = {"INDIVIDUAL","EDUCATIONAL_INSTITUTION", "EVENT"}) VisitorType visitorType,
         @Schema(example = "Escuela Técnica N°1") String institutionName,
         @Schema(example = "25") Integer institutionStudents,
-        @Schema(example = "1") int adults18Plus,
-        @Schema(example = "0") int children2To17,
-        @Schema(example = "0") int babiesLessThan2,
-        @Schema(example = "0") int reducedMobility,
-        @Schema(example = "0") int allergies,
+        @Min(0) @Schema(example = "1") int adults18Plus,
+        @Min(0) @Schema(example = "0") int children2To17,
+        @Min(0) @Schema(example = "0") int babiesLessThan2,
+        @Min(0) @Schema(example = "0") int reducedMobility,
+        @Min(0) @Schema(example = "0") int allergies,
         @Schema(example = "—") String comment,
         @Schema(example = "Córdoba, AR") String originLocation,
-        @Schema(example = "ADS", allowableValues = {"SOCIAL","RECOMMENDATION","WEBSITE","ADS","OTHER"}) HowHeard howHeard,
-        @Schema(example = "true") boolean acceptedPolicies,
+        @NotNull @Schema(example = "ADS", allowableValues = {"SOCIAL","RECOMMENDATION","WEBSITE","ADS","OTHER"}) HowHeard howHeard,
+        @AssertTrue @Schema(example = "true") boolean acceptedPolicies,
 
         @Schema(description = "Listado de visitantes efectivamente presentes")
         java.util.List<VisitorDTO> visitors

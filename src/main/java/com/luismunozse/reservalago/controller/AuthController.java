@@ -7,11 +7,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -53,9 +56,14 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401)
                     .body(new ErrorResponse("Credenciales inválidas"));
+        } catch (AuthenticationException e) {
+            // Cubre UsernameNotFoundException, InternalAuthenticationServiceException, etc.
+            return ResponseEntity.status(401)
+                    .body(new ErrorResponse("Credenciales inválidas"));
         } catch (Exception e) {
+            log.error("Error inesperado en login para usuario {}: {}", loginRequest.getEmail(), e.getMessage(), e);
             return ResponseEntity.status(500)
-                    .body(new ErrorResponse("Error en el servidor: " + e.getMessage()));
+                    .body(new ErrorResponse("Error en el servidor"));
         }
     }
 

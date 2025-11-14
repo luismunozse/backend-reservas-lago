@@ -30,7 +30,7 @@ public class SecurityConfig {
         
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()  // Login público
-                .requestMatchers("/api/admin/**").authenticated()  // Admin requiere auth
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Admin requiere rol ADMIN
                 .requestMatchers(
                         "/v3/api-docs/**",
                         "/swagger-ui.html",

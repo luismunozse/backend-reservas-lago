@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
 @Tag(name = "Gestión de Usuarios", description = "Endpoints para administrar usuarios del sistema")
-@SecurityRequirement(name = "Bearer Authentication")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;
