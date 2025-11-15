@@ -57,12 +57,12 @@ public class AdminController {
         availability.save(rule);
     }
 
-    // Exportación CSV
-    @Operation(summary = "Exportar reservas CSV",
-            description = "Exporta las reservas de una fecha en formato CSV, con filtros opcionales por estado y tipo de visitante")
+    // Exportación Excel
+    @Operation(summary = "Exportar reservas Excel",
+            description = "Exporta las reservas de una fecha en formato Excel (XLSX), con filtros opcionales por estado y tipo de visitante. Los datos de contacto se exportan completos.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CSV generado correctamente",
-                    content = @Content(mediaType = "text/csv")),
+            @ApiResponse(responseCode = "200", description = "Archivo Excel generado correctamente",
+                    content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos para exportar reservas")
     })
@@ -70,14 +70,14 @@ public class AdminController {
     public ResponseEntity<byte[]> export(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) ReservationStatus status,
-            @RequestParam(required = false) VisitorType visitorType,
-            @RequestParam(required = false, defaultValue = "false") boolean mask
+            @RequestParam(required = false) VisitorType visitorType
     ) {
-        byte[] data = reservationService.exportCsv(date, status, visitorType, mask);
-        String filename = String.format("reservas_%s.csv", date);
+        // Para uso administrativo exportamos siempre datos completos (sin enmascarar)
+        byte[] data = reservationService.exportCsv(date, status, visitorType, false);
+        String filename = String.format("reservas_%s.xlsx", date);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(data);
     }
 

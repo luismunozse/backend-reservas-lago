@@ -3,6 +3,7 @@ package com.luismunozse.reservalago.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
@@ -23,5 +24,8 @@ public class CreateUserRequest {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
+
+    @Pattern(regexp = "ADMIN|MANAGER", message = "El rol debe ser ADMIN o MANAGER")
+    private String role;
 }
 

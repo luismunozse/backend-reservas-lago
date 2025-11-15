@@ -117,6 +117,7 @@ public class ReservationService {
     }
 
 
+    @Transactional(readOnly = true)
     public byte[] exportCsv(LocalDate date, ReservationStatus status, VisitorType visitorType, boolean maskContacts) {
         List<Reservation> list = reservations.findAllByVisitDate(date);
         if (status != null) {

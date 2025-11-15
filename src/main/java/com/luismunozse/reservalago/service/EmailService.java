@@ -85,15 +85,12 @@ public class EmailService {
      */
     private void sendHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
         
         helper.setFrom(fromEmail);
         helper.setTo(to);
         helper.setSubject(subject);
-        
-        // Crear versión de texto plano
-        String textContent = createPlainTextVersion(htmlContent);
-        helper.setText(textContent, htmlContent);
+        helper.setText(htmlContent, true);
         
         mailSender.send(message);
     }
@@ -101,18 +98,18 @@ public class EmailService {
     /**
      * Crea una versión de texto plano del email
      */
-    private String createPlainTextVersion(String htmlContent) {
-        // Remover etiquetas HTML básicas y crear versión de texto
-        return htmlContent
-            .replaceAll("<[^>]+>", "") // Remover todas las etiquetas HTML
-            .replaceAll("&nbsp;", " ") // Reemplazar espacios no separables
-            .replaceAll("&amp;", "&") // Reemplazar ampersands
-            .replaceAll("&lt;", "<") // Reemplazar menor que
-            .replaceAll("&gt;", ">") // Reemplazar mayor que
-            .replaceAll("&quot;", "\"") // Reemplazar comillas
-            .replaceAll("\\s+", " ") // Normalizar espacios
-            .trim();
-    }
+    // private String createPlainTextVersion(String htmlContent) {
+    //     // Remover etiquetas HTML básicas y crear versión de texto
+    //     return htmlContent
+    //         .replaceAll("<[^>]+>", "") // Remover todas las etiquetas HTML
+    //         .replaceAll("&nbsp;", " ") // Reemplazar espacios no separables
+    //         .replaceAll("&amp;", "&") // Reemplazar ampersands
+    //         .replaceAll("&lt;", "<") // Reemplazar menor que
+    //         .replaceAll("&gt;", ">") // Reemplazar mayor que
+    //         .replaceAll("&quot;", "\"") // Reemplazar comillas
+    //         .replaceAll("\\s+", " ") // Normalizar espacios
+    //         .trim();
+    // }
 
     /**
      * Genera el contenido HTML para email de confirmación

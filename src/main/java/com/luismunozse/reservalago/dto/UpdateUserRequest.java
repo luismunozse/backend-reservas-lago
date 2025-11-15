@@ -2,6 +2,7 @@ package com.luismunozse.reservalago.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
@@ -20,5 +21,8 @@ public class UpdateUserRequest {
     private String password;
     
     private Boolean enabled;
+
+    @Pattern(regexp = "ADMIN|MANAGER", message = "El rol debe ser ADMIN o MANAGER")
+    private String role;
 }
 

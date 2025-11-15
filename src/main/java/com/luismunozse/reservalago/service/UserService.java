@@ -35,7 +35,15 @@ public class UserService {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("ADMIN"); // Por defecto, todos los usuarios creados son administradores
+
+        String role = request.getRole();
+        if (role == null || role.isBlank()) {
+            role = "ADMIN"; // rol por defecto
+        }
+        if (!role.equals("ADMIN") && !role.equals("MANAGER")) {
+            throw new IllegalArgumentException("El rol debe ser ADMIN o MANAGER");
+        }
+        user.setRole(role);
         user.setEnabled(true);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -91,6 +99,14 @@ public class UserService {
 
         if (request.getEnabled() != null) {
             user.setEnabled(request.getEnabled());
+        }
+
+        if (request.getRole() != null && !request.getRole().isBlank()) {
+            String role = request.getRole();
+            if (!role.equals("ADMIN") && !role.equals("MANAGER")) {
+                throw new IllegalArgumentException("El rol debe ser ADMIN o MANAGER");
+            }
+            user.setRole(role);
         }
 
         user.setUpdatedAt(LocalDateTime.now());
