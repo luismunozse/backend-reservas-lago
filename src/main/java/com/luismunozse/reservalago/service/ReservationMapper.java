@@ -132,6 +132,9 @@ public class ReservationMapper {
                 r.getStatus() != null ? r.getStatus().name() : null,
                 r.getCreatedAt(),
                 r.getDni(),
+                r.getReducedMobility(),   // 👈 NUEVO
+                r.getAllergies(),         // 👈 NUEVO
+                r.getComment(),           // 👈 NUEVO
                 visitors
         );
     }
