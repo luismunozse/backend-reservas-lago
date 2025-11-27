@@ -68,13 +68,31 @@ public class AdminController {
     })
     @GetMapping("/reservations/export")
     public ResponseEntity<byte[]> export(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) String month, // formato YYYY-MM
+            @RequestParam(required = false) Integer year,
             @RequestParam(required = false) ReservationStatus status,
-            @RequestParam(required = false) VisitorType visitorType
+            @RequestParam(required = false) VisitorType visitorType,
+            @RequestParam(required = false) String dni
     ) {
+        java.time.YearMonth ym = null;
+        if (month != null && !month.isBlank()) {
+            ym = java.time.YearMonth.parse(month);
+        }
+
         // Para uso administrativo exportamos siempre datos completos (sin enmascarar)
-        byte[] data = reservationService.exportCsv(date, status, visitorType, false);
-        String filename = String.format("reservas_%s.xlsx", date);
+        byte[] data = reservationService.exportCsv(date, ym, year, status, visitorType, dni, false);
+
+        String filename;
+        if (date != null) {
+            filename = String.format("reservas_%s.xlsx", date);
+        } else if (ym != null) {
+            filename = String.format("reservas_%s.xlsx", ym);
+        } else if (year != null) {
+            filename = String.format("reservas_%s.xlsx", year);
+        } else {
+            filename = "reservas.xlsx";
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
@@ -93,9 +111,10 @@ public class AdminController {
     public java.util.List<AdminReservationDTO> listReservations(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) ReservationStatus status
+            @RequestParam(required = false) ReservationStatus status,
+            @RequestParam(required = false) String dni
     ) {
-        return reservationService.adminList(date, status);
+        return reservationService.adminList(date, status, dni);
     }
 
     @Operation(summary = "Confirmar una reserva",

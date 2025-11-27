@@ -13,7 +13,9 @@ public record CreateReservationRequest(
         @NotNull @Schema(example = "2025-09-02") LocalDate visitDate,
         @NotBlank @Schema(example = "Luis") String firstName,
         @NotBlank @Schema(example = "Muñoz") String lastName,
-        @NotBlank @Schema(example = "12345678") String dni,
+        @NotBlank
+        @Pattern(regexp = "\\d{8}", message = "dni debe tener exactamente 8 digitos")
+        @Schema(example = "12345678") String dni,
         @NotBlank @Schema(example = "+54 9 351 000-0000") String phone,
         @NotBlank @Email @Schema(example = "luis@example.com") String email,
         @NotNull @Schema(example = "A", allowableValues = {"A","B","C","D"}) Circuit circuit,

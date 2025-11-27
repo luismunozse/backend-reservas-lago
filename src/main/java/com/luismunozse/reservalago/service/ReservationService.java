@@ -84,7 +84,7 @@ public class ReservationService {
         if (dni != null && reservations.existsByVisitDateAndDniAndStatusNot(
                 req.visitDate(), dni, ReservationStatus.CANCELLED)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Ya existe una reserva para ese DNI en esa fecha.");
+                    "Ya existe una visita con ese DNI en esa fecha.");
         }
 
         Reservation r = reservationMapper.fromCreateRequest(req, dni);
@@ -118,13 +118,51 @@ public class ReservationService {
 
 
     @Transactional(readOnly = true)
-    public byte[] exportCsv(LocalDate date, ReservationStatus status, VisitorType visitorType, boolean maskContacts) {
-        List<Reservation> list = reservations.findAllByVisitDate(date);
-        if (status != null) {
-            list = list.stream().filter(r -> r.getStatus() == status).collect(Collectors.toList());
+    public byte[] exportCsv(LocalDate date, java.time.YearMonth month, Integer year,
+                            ReservationStatus status, VisitorType visitorType,
+                            String dni, boolean maskContacts) {
+        List<Reservation> list;
+        String normalizedDni = reservationMapper.normalizeDni(dni);
+
+        if (normalizedDni != null && !normalizedDni.isBlank()) {
+            list = reservations.findAllByDni(normalizedDni);
+        } else if (date != null && status != null) {
+            list = reservations.findAllByVisitDateAndStatus(date, status);
+        } else if (date != null) {
+            list = reservations.findAllByVisitDate(date);
+        } else if (status != null) {
+            list = reservations.findAllByStatus(status);
+        } else {
+            list = reservations.findAll();
+        }
+
+        if (date != null && (normalizedDni != null && !normalizedDni.isBlank())) {
+            list = list.stream()
+                    .filter(r -> date.equals(r.getVisitDate()))
+                    .toList();
+        }
+        if (month != null) {
+            list = list.stream()
+                    .filter(r -> r.getVisitDate() != null &&
+                            r.getVisitDate().getYear() == month.getYear() &&
+                            r.getVisitDate().getMonth() == month.getMonth())
+                    .toList();
+        }
+        if (year != null) {
+            list = list.stream()
+                    .filter(r -> r.getVisitDate() != null &&
+                            r.getVisitDate().getYear() == year)
+                    .toList();
+        }
+        if (status != null && (normalizedDni != null && !normalizedDni.isBlank())) {
+            list = list.stream()
+                    .filter(r -> status == r.getStatus())
+                    .toList();
         }
         if (visitorType != null) {
-            list = list.stream().filter(r -> r.getVisitorType() == visitorType).collect(Collectors.toList());
+            list = list.stream()
+                    .filter(r -> r.getVisitorType() == visitorType)
+                    .collect(Collectors.toList());
         }
         return reservationCsvExporter.exportCsv(list, maskContacts);
     }
@@ -136,10 +174,23 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminReservationDTO> adminList(LocalDate date, ReservationStatus status) {
+    public List<AdminReservationDTO> adminList(LocalDate date, ReservationStatus status, String dni) {
         List<Reservation> list;
+        String normalizedDni = reservationMapper.normalizeDni(dni);
 
-        if (date != null && status != null) {
+        if (normalizedDni != null && !normalizedDni.isBlank()) {
+            list = reservations.findAllByDni(normalizedDni);
+            if (date != null) {
+                list = list.stream()
+                        .filter(r -> date.equals(r.getVisitDate()))
+                        .toList();
+            }
+            if (status != null) {
+                list = list.stream()
+                        .filter(r -> status == r.getStatus())
+                        .toList();
+            }
+        } else if (date != null && status != null) {
             list = reservations.findAllByVisitDateAndStatus(date, status);
         } else if (date != null) {
             list = reservations.findAllByVisitDate(date);
@@ -184,7 +235,7 @@ public class ReservationService {
         String root = ex.getMessage() != null ? ex.getMessage() : "";
         if (root.contains("ux_reservations_date_dni")) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Ya existe una reserva para ese DNI en esa fecha.");
+                    "Ya existe una visita con ese DNI en esa fecha.");
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Datos inválidos", ex);
     }

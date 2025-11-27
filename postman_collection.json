@@ -1,0 +1,455 @@
+{
+  "info": {
+    "name": "Lago Escondido - Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "b2a1e9ae-7c77-4e63-8a0e-9c6a3b3c9f01",
+    "description": "Coleccion para probar la API de reservas. Configura `baseUrl` y el token `authToken` despues de hacer login."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@lago-escondido.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Publico",
+      "item": [
+        {
+          "name": "Disponibilidad por fecha",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/availability?date=2025-12-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "availability"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-12-15"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Disponibilidad por mes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/availability?month=2025-12",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "availability"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2025-12"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear reserva",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitDate\": \"2025-12-15\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"dni\": \"12345678\",\n  \"phone\": \"+5491100000000\",\n  \"email\": \"juan@example.com\",\n  \"circuit\": \"A\",\n  \"visitorType\": \"INDIVIDUAL\",\n  \"institutionName\": null,\n  \"institutionStudents\": null,\n  \"adults18Plus\": 2,\n  \"children2To17\": 0,\n  \"babiesLessThan2\": 0,\n  \"reducedMobility\": 0,\n  \"allergies\": 0,\n  \"comment\": \"\",\n  \"originLocation\": \"CABA\",\n  \"howHeard\": \"WEB\",\n  \"acceptedPolicies\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resumen de reserva por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/reservations/{{reservationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reservations", "{{reservationId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Reservas - Listar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reservas - Listar por DNI",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reservations?dni=30111222",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reservations"],
+              "query": [
+                {
+                  "key": "dni",
+                  "value": "30111222"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reservas - Confirmar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reservations/{{reservationId}}/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reservations", "{{reservationId}}", "confirm"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reservas - Cancelar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reservations/{{reservationId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reservations", "{{reservationId}}", "cancel"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reservas - Exportar XLSX",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reservations/export?month=2025-12&status=PENDING&visitorType=INDIVIDUAL&dni=30111222",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reservations", "export"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2025-12"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "visitorType",
+                  "value": "INDIVIDUAL"
+                },
+                {
+                  "key": "dni",
+                  "value": "30111222"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Disponibilidad - Upsert capacidad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"capacity\": 40 }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/availability/2025-12-15",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "availability", "2025-12-15"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitDate\": \"2025-12-20\",\n  \"capacity\": 100,\n  \"firstName\": \"Org\",\n  \"lastName\": \"Evento\",\n  \"dni\": \"99999999\",\n  \"phone\": \"1111111\",\n  \"email\": \"evento@example.com\",\n  \"circuit\": \"B\",\n  \"visitorType\": \"EVENT\",\n  \"adults18Plus\": 10,\n  \"children2To17\": 0,\n  \"babiesLessThan2\": 0,\n  \"reducedMobility\": 0,\n  \"allergies\": 0,\n  \"comment\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/eventos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "eventos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Config - Estado reservas educativas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config/educational-reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "config", "educational-reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Config - Toggle reservas educativas",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"enabled\": true }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/config/educational-reservations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "config", "educational-reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuarios - Crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo-admin@example.com\",\n  \"password\": \"Cambiar123\",\n  \"firstName\": \"Nuevo\",\n  \"lastName\": \"Admin\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuarios - Listar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuarios - Obtener por email",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{userEmail}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "{{userEmail}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuarios - Actualizar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"NuevoNombre\",\n  \"lastName\": \"NuevoApellido\",\n  \"password\": \"NuevoPass123\",\n  \"role\": \"MANAGER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuarios - Eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users", "{{userId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "reservationId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "userEmail",
+      "value": ""
+    }
+  ]
+}
