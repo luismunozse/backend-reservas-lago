@@ -44,23 +44,23 @@ Servicio Spring Boot (Java 21) para gestionar reservas del Lago Escondido. Usa P
 - Variables comunes utiles: `PORT`, `DEFAULT_CAPACITY`, `APP_MAIL_ENABLED`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `ALLOWED_ORIGINS`, `JWT_EXPIRATION`.
 
 ## Como correr en local (dev)
-### Opcion A: todo en Docker (sin instalar JDK)
+### Opcion A: todo en Docker (recomendado)
 1) `cd backend-reservas-lago`
-2) `docker compose -f docker-compose.dev.yml up -d --build`
-   - Backend queda en `http://localhost:8080`, base Postgres en `localhost:5432`, MailHog en `http://localhost:8025`.
-   - El contenedor usa TZ UTC por defecto (JAVA_OPTS en compose).
-   - Si reconfiguras la DB, ajusta `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` en el compose.
-3) Logs en vivo: `docker compose -f docker-compose.dev.yml logs -f app`
-4) Login admin: email `admin@lago-escondido.com`, password `admin123` (token via `POST /api/auth/login`).
+2) `docker compose up --build`
+   - Backend: `http://localhost:8080`
+   - PostgreSQL: `localhost:5432`
+3) Logs en vivo: `docker compose logs -f backend`
+4) Detener: `docker compose down`
+5) Login admin: email `admin@lago-escondido.com`, password `admin123` (token via `POST /api/auth/login`).
 
-### Opcion B: local con Maven
+### Opcion B: local con Maven (requiere JDK 21)
 1) Entrar al proyecto: `cd backend-reservas-lago`
-2) Levantar Postgres (y MailHog opcional) con Docker: `docker compose up -d`  
-3) Asegurar el perfil:  
-   - Windows PowerShell: `$Env:SPRING_PROFILES_ACTIVE="dev"`  
+2) Levantar solo Postgres: `docker compose up -d db`
+3) Asegurar el perfil:
+   - Windows PowerShell: `$Env:SPRING_PROFILES_ACTIVE="dev"`
    - Linux/macOS: `export SPRING_PROFILES_ACTIVE=dev`
-4) Arrancar la app:  
-   - Windows: `mvnw.cmd spring-boot:run`  
+4) Arrancar la app:
+   - Windows: `mvnw.cmd spring-boot:run`
    - Linux/macOS: `./mvnw spring-boot:run`
 5) Revisar: health en `http://localhost:8080/actuator/health`, docs swagger en `http://localhost:8080/docs`.
 6) Login admin: email `admin@lago-escondido.com`, password `admin123` (token via `POST /api/auth/login`).
@@ -78,6 +78,6 @@ Servicio Spring Boot (Java 21) para gestionar reservas del Lago Escondido. Usa P
 
 ## Notas
 - Flyway corre migraciones al iniciar; no necesita pasos manuales extra.
-- Para desactivar correo en desarrollo: `APP_MAIL_ENABLED=false` o usar MailHog (`localhost:8025`).
+- El envío de correo está deshabilitado por defecto en desarrollo (`APP_MAIL_ENABLED=false`).
 - Exportaciones administrativas generan XLSX y respetan filtros por fecha, estado y tipo de visitante.
 - DNIs deben enviarse con exactamente 8 dígitos (sin puntos ni guiones); el backend valida formato.

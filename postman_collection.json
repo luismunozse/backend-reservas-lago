@@ -190,40 +190,287 @@
           "response": []
         },
         {
-          "name": "Reservas - Exportar XLSX",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/admin/reservations/export?month=2025-12&status=PENDING&visitorType=INDIVIDUAL&dni=30111222",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "admin", "reservations", "export"],
-              "query": [
-                {
-                  "key": "month",
-                  "value": "2025-12"
-                },
-                {
-                  "key": "status",
-                  "value": "PENDING"
-                },
-                {
-                  "key": "visitorType",
-                  "value": "INDIVIDUAL"
-                },
-                {
-                  "key": "dni",
-                  "value": "30111222"
+          "name": "Exportación Excel",
+          "item": [
+            {
+              "name": "Exportar - Todas las reservas",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"]
                 }
-              ]
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por fecha específica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?date=2025-12-15",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2025-12-15",
+                      "description": "Fecha de visita (YYYY-MM-DD)"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por mes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?month=2025-12",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "2025-12",
+                      "description": "Mes completo (YYYY-MM)"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por año",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?year=2025",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2025",
+                      "description": "Año completo"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por DNI",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?dni=12345678",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "dni",
+                      "value": "12345678",
+                      "description": "DNI del titular o visitante"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por nombre",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?name=García",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "García",
+                      "description": "Nombre o apellido (titular o visitante, case-insensitive)"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por estado",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?status=CONFIRMED",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "CONFIRMED",
+                      "description": "Estado: PENDING, CONFIRMED, CANCELLED"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Por tipo de visitante",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?visitorType=EDUCATIONAL_INSTITUTION",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "visitorType",
+                      "value": "EDUCATIONAL_INSTITUTION",
+                      "description": "Tipo: INDIVIDUAL, EDUCATIONAL_INSTITUTION, EVENT"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Combinación de filtros",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?date=2025-12-15&status=CONFIRMED&name=García&dni=12345678",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2025-12-15",
+                      "description": "Fecha de visita"
+                    },
+                    {
+                      "key": "status",
+                      "value": "CONFIRMED",
+                      "description": "Estado de la reserva"
+                    },
+                    {
+                      "key": "name",
+                      "value": "García",
+                      "description": "Nombre o apellido"
+                    },
+                    {
+                      "key": "dni",
+                      "value": "12345678",
+                      "description": "DNI"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Exportar - Filtros completos",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/admin/reservations/export?month=2025-12&status=PENDING&visitorType=INDIVIDUAL&dni=30111222&name=Juan",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "admin", "reservations", "export"],
+                  "query": [
+                    {
+                      "key": "month",
+                      "value": "2025-12",
+                      "description": "Mes de visita"
+                    },
+                    {
+                      "key": "status",
+                      "value": "PENDING",
+                      "description": "Estado"
+                    },
+                    {
+                      "key": "visitorType",
+                      "value": "INDIVIDUAL",
+                      "description": "Tipo de visitante"
+                    },
+                    {
+                      "key": "dni",
+                      "value": "30111222",
+                      "description": "DNI"
+                    },
+                    {
+                      "key": "name",
+                      "value": "Juan",
+                      "description": "Nombre o apellido"
+                    }
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
           "name": "Disponibilidad - Upsert capacidad",

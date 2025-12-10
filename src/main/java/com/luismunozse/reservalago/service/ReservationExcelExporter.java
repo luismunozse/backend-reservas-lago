@@ -14,20 +14,22 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
-public class ReservationCsvExporter {
+public class ReservationExcelExporter {
 
     /**
-     * Exporta reservas a una única hoja de Excel. Cada reserva se muestra en una fila
-     * y, si tiene acompañantes, cada acompañante se agrega en filas consecutivas debajo,
-     * con las columnas principales vacías salvo la fecha y nombre del acompañante.
+     * Exporta reservas a una única hoja de Excel (XLSX). Cada reserva se muestra en una fila
+     * y, si tiene visitantes, cada visitante se agrega en filas consecutivas debajo,
+     * con las columnas principales vacías salvo la fecha y nombre del visitante.
      */
-    public byte[] exportCsv(List<Reservation> reservations, boolean maskContacts) {
+    public byte[] exportExcel(List<Reservation> reservations, boolean maskContacts) {
         String[] headers = {
-                "Rol",                // Titular / Acompañante
+                "Rol",                // Titular / Visitante
                 "Fecha de visita",
                 "Estado",
                 "Nombre",
@@ -64,9 +66,10 @@ public class ReservationCsvExporter {
                 cell.setCellStyle(headerStyle);
             }
 
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            // Formato de fecha: DD/MM/YYYY sin horario
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            // Estilos para distinguir titular / acompañante
+            // Estilos para distinguir titular / visitante
             CellStyle mainStyle = workbook.createCellStyle();
             var mainFont = workbook.createFont();
             mainFont.setBold(true);
@@ -83,7 +86,7 @@ public class ReservationCsvExporter {
                 Row mainRow = sheet.createRow(rowIdx++);
                 fillMainRow(mainRow, r, dateFormatter, maskContacts, mainStyle);
 
-                // Filas de acompañantes debajo
+                // Filas de visitantes debajo
                 if (r.getVisitors() != null && !r.getVisitors().isEmpty()) {
                     for (ReservationVisitor v : r.getVisitors()) {
                         Row visitorRow = sheet.createRow(rowIdx++);
@@ -122,12 +125,18 @@ public class ReservationCsvExporter {
         set(row, col++, String.valueOf(r.getBabiesLessThan2()), style);
         set(row, col++, String.valueOf(r.getReducedMobility()), style);
         set(row, col++, String.valueOf(r.getAllergies()), style);
-        set(row, col, r.getCreatedAt() != null ? r.getCreatedAt().toString() : "", style);
+        // Convertir Instant a fecha local y formatear como DD/MM/YYYY
+        String createdDate = "";
+        if (r.getCreatedAt() != null) {
+            LocalDateTime ldt = LocalDateTime.ofInstant(r.getCreatedAt(), ZoneId.systemDefault());
+            createdDate = ldt.toLocalDate().format(dateFormatter);
+        }
+        set(row, col, createdDate, style);
     }
 
     private static void fillVisitorRow(Row row, Reservation r, ReservationVisitor v, DateTimeFormatter dateFormatter, boolean maskContacts, CellStyle style) {
         int col = 0;
-        set(row, col++, "Acompañante", style);
+        set(row, col++, "Visitante", style);
         set(row, col++, r.getVisitDate() != null ? r.getVisitDate().format(dateFormatter) : "", style);
         set(row, col++, "", style); // Estado
         set(row, col++, n(v.getFirstName()), style);
@@ -135,7 +144,7 @@ public class ReservationCsvExporter {
         set(row, col++, maskContacts ? mask(v.getDni()) : n(v.getDni()), style);
         set(row, col++, "", style); // Email no se repite
         set(row, col++, "", style); // Teléfono no se repite
-        set(row, col++, "Acompañante", style); // Tipo de visitante
+        set(row, col++, "Visitante", style); // Tipo de visitante
         set(row, col++, r.getCircuit() != null ? r.getCircuit().name() : "", style);
         set(row, col++, n(r.getOriginLocation()), style);
         set(row, col++, "", style);

@@ -59,10 +59,11 @@ public class AdminController {
 
     // Exportación Excel
     @Operation(summary = "Exportar reservas Excel",
-            description = "Exporta las reservas de una fecha en formato Excel (XLSX), con filtros opcionales por estado y tipo de visitante. Los datos de contacto se exportan completos.")
+            description = "Exporta las reservas en formato Excel (XLSX), con filtros opcionales por fecha, mes, año, estado, tipo de visitante, DNI y nombre. Los datos de contacto se exportan completos. Límite máximo: 10,000 registros.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Archivo Excel generado correctamente",
                     content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")),
+            @ApiResponse(responseCode = "400", description = "Demasiados registros. Aplique más filtros"),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos para exportar reservas")
     })
@@ -73,7 +74,8 @@ public class AdminController {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) VisitorType visitorType,
-            @RequestParam(required = false) String dni
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String name // Nombre o apellido a buscar
     ) {
         java.time.YearMonth ym = null;
         if (month != null && !month.isBlank()) {
@@ -81,7 +83,7 @@ public class AdminController {
         }
 
         // Para uso administrativo exportamos siempre datos completos (sin enmascarar)
-        byte[] data = reservationService.exportCsv(date, ym, year, status, visitorType, dni, false);
+        byte[] data = reservationService.exportExcel(date, ym, year, status, visitorType, dni, name, false);
 
         String filename;
         if (date != null) {

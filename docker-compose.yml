@@ -1,4 +1,20 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/lago
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      db:
+        condition: service_started
+    restart: unless-stopped
+
   db:
     image: postgres:16
     environment:
@@ -9,12 +25,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    ports:
-      - "8025:8025"   # UI web de MailHog
-      - "1025:1025"   # SMTP
+    restart: unless-stopped
 
 volumes:
   pgdata: {}

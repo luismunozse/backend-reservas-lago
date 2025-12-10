@@ -5,26 +5,22 @@ import com.luismunozse.reservalago.model.*;
 import com.luismunozse.reservalago.repo.ReservationRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservations;
-    private final EmailService emailService;
     private final SystemConfigService systemConfigService;
     private final ReservationMapper reservationMapper;
-    private final ReservationCsvExporter reservationCsvExporter;
+    private final ReservationExcelExporter reservationExcelExporter;
     private final AvailabilityService availabilityService;
 
     @Transactional
@@ -95,7 +91,6 @@ public class ReservationService {
             handleDataIntegrityViolation(ex);
         }
 
-        emailService.sendReservationConfirmation(r);
         return r.getId();
     }
 
@@ -106,65 +101,49 @@ public class ReservationService {
         return r.getId();
     }
 
-    @Scheduled(cron = "0 0 * * * *") // cada hora
-    public void sendReminders() {
-        LocalDate in48h = LocalDate.now().plusDays(2);
-        List<Reservation> list = reservations.findAllByVisitDateAndStatus(in48h, ReservationStatus.PENDING);
-        for (Reservation r : list) {
-            // TODO: Crear template específico para recordatorios
-            emailService.sendReservationConfirmation(r);
-        }
-    }
 
 
     @Transactional(readOnly = true)
-    public byte[] exportCsv(LocalDate date, java.time.YearMonth month, Integer year,
-                            ReservationStatus status, VisitorType visitorType,
-                            String dni, boolean maskContacts) {
-        List<Reservation> list;
+    public byte[] exportExcel(LocalDate date, java.time.YearMonth month, Integer year,
+                              ReservationStatus status, VisitorType visitorType,
+                              String dni, String name, boolean maskContacts) {
         String normalizedDni = reservationMapper.normalizeDni(dni);
 
-        if (normalizedDni != null && !normalizedDni.isBlank()) {
-            list = reservations.findAllByDni(normalizedDni);
-        } else if (date != null && status != null) {
-            list = reservations.findAllByVisitDateAndStatus(date, status);
-        } else if (date != null) {
-            list = reservations.findAllByVisitDate(date);
-        } else if (status != null) {
-            list = reservations.findAllByStatus(status);
-        } else {
-            list = reservations.findAll();
+        // Calcular rangos para mes y año
+        LocalDate monthStart = null;
+        LocalDate monthEnd = null;
+        if (month != null) {
+            monthStart = month.atDay(1);
+            monthEnd = month.atEndOfMonth();
         }
 
-        if (date != null && (normalizedDni != null && !normalizedDni.isBlank())) {
-            list = list.stream()
-                    .filter(r -> date.equals(r.getVisitDate()))
-                    .toList();
-        }
-        if (month != null) {
-            list = list.stream()
-                    .filter(r -> r.getVisitDate() != null &&
-                            r.getVisitDate().getYear() == month.getYear() &&
-                            r.getVisitDate().getMonth() == month.getMonth())
-                    .toList();
-        }
+        LocalDate yearStart = null;
+        LocalDate yearEnd = null;
         if (year != null) {
-            list = list.stream()
-                    .filter(r -> r.getVisitDate() != null &&
-                            r.getVisitDate().getYear() == year)
-                    .toList();
+            yearStart = LocalDate.of(year, 1, 1);
+            yearEnd = LocalDate.of(year, 12, 31);
         }
-        if (status != null && (normalizedDni != null && !normalizedDni.isBlank())) {
-            list = list.stream()
-                    .filter(r -> status == r.getStatus())
-                    .toList();
+
+        // Consulta optimizada en base de datos (native query requiere Strings para enums)
+        List<Reservation> list = reservations.findWithFilters(
+            date,
+            monthStart,
+            monthEnd,
+            yearStart,
+            yearEnd,
+            status != null ? status.name() : null,
+            visitorType != null ? visitorType.name() : null,
+            normalizedDni,
+            name
+        );
+
+        // Límite de seguridad para evitar exportaciones masivas
+        if (list.size() > 10000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Demasiados registros (" + list.size() + "). Límite: 10,000. Aplique más filtros.");
         }
-        if (visitorType != null) {
-            list = list.stream()
-                    .filter(r -> r.getVisitorType() == visitorType)
-                    .collect(Collectors.toList());
-        }
-        return reservationCsvExporter.exportCsv(list, maskContacts);
+
+        return reservationExcelExporter.exportExcel(list, maskContacts);
     }
 
 
@@ -215,9 +194,6 @@ public class ReservationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservations.save(reservation);
-        
-        // Enviar email de confirmación actualizada
-        emailService.sendReservationConfirmation(reservation);
     }
 
     @Transactional
@@ -226,9 +202,6 @@ public class ReservationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservations.save(reservation);
-        
-        // Enviar email de cancelación
-        emailService.sendReservationCancellation(reservation);
     }
 
     private void handleDataIntegrityViolation(DataIntegrityViolationException ex) {

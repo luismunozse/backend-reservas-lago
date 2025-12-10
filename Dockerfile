@@ -7,14 +7,16 @@ WORKDIR /app
 # Copiar archivo de configuración de Maven
 COPY pom.xml .
 
-# Descargar dependencias (esto se cachea si no cambia el pom.xml)
-RUN mvn dependency:go-offline -B
+# Descargar dependencias con cache de BuildKit
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn dependency:go-offline -B
 
 # Copiar código fuente
 COPY src src
 
-# Compilar la aplicación
-RUN mvn clean package -DskipTests
+# Compilar la aplicación con cache de BuildKit
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn clean package -DskipTests
 
 # Imagen de producción
 FROM eclipse-temurin:21-jre-alpine
