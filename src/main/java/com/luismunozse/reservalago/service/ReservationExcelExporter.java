@@ -44,7 +44,6 @@ public class ReservationExcelExporter {
                 "Menores 2-17",
                 "Bebés <2",
                 "Movilidad reducida",
-                "Alergias",
                 "Creada"
         };
 
@@ -124,7 +123,6 @@ public class ReservationExcelExporter {
         set(row, col++, String.valueOf(r.getChildren2To17()), style);
         set(row, col++, String.valueOf(r.getBabiesLessThan2()), style);
         set(row, col++, String.valueOf(r.getReducedMobility()), style);
-        set(row, col++, String.valueOf(r.getAllergies()), style);
         // Convertir Instant a fecha local y formatear como DD/MM/YYYY
         String createdDate = "";
         if (r.getCreatedAt() != null) {
@@ -147,7 +145,6 @@ public class ReservationExcelExporter {
         set(row, col++, "Visitante", style); // Tipo de visitante
         set(row, col++, r.getCircuit() != null ? r.getCircuit().name() : "", style);
         set(row, col++, n(r.getOriginLocation()), style);
-        set(row, col++, "", style);
         set(row, col++, "", style);
         set(row, col++, "", style);
         set(row, col++, "", style);

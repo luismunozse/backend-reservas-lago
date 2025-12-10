@@ -41,7 +41,6 @@ public class ReservationMapper {
         r.setChildren2To17(req.children2To17());
         r.setBabiesLessThan2(req.babiesLessThan2());
         r.setReducedMobility(req.reducedMobility());
-        r.setAllergies(req.allergies());
         r.setComment(req.comment());
         r.setOriginLocation(req.originLocation());
         r.setHowHeard(req.howHeard());
@@ -94,7 +93,6 @@ public class ReservationMapper {
         r.setComment(req.notas());
 
         r.setReducedMobility(0);
-        r.setAllergies(0);
         r.setOriginLocation("N/A");
         r.setHowHeard(com.luismunozse.reservalago.model.HowHeard.OTHER);
         r.setAcceptedPolicies(true);
@@ -132,9 +130,8 @@ public class ReservationMapper {
                 r.getStatus() != null ? r.getStatus().name() : null,
                 r.getCreatedAt(),
                 r.getDni(),
-                r.getReducedMobility(),   // 👈 NUEVO
-                r.getAllergies(),         // 👈 NUEVO
-                r.getComment(),           // 👈 NUEVO
+                r.getReducedMobility(),
+                r.getComment(),
                 visitors
         );
     }

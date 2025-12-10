@@ -42,8 +42,6 @@ public class Reservation {
     private int babiesLessThan2;
     @Column(nullable = false)
     private int reducedMobility;
-    @Column(nullable = false)
-    private int allergies;
     @Column(columnDefinition = "text")
     private String comment;
     @Column(columnDefinition = "text")

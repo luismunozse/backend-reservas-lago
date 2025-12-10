@@ -84,7 +84,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"visitDate\": \"2025-12-15\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"dni\": \"12345678\",\n  \"phone\": \"+5491100000000\",\n  \"email\": \"juan@example.com\",\n  \"circuit\": \"A\",\n  \"visitorType\": \"INDIVIDUAL\",\n  \"institutionName\": null,\n  \"institutionStudents\": null,\n  \"adults18Plus\": 2,\n  \"children2To17\": 0,\n  \"babiesLessThan2\": 0,\n  \"reducedMobility\": 0,\n  \"allergies\": 0,\n  \"comment\": \"\",\n  \"originLocation\": \"CABA\",\n  \"howHeard\": \"WEB\",\n  \"acceptedPolicies\": true\n}"
+              "raw": "{\n  \"visitDate\": \"2025-12-15\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"dni\": \"12345678\",\n  \"phone\": \"+5491100000000\",\n  \"email\": \"juan@example.com\",\n  \"circuit\": \"A\",\n  \"visitorType\": \"INDIVIDUAL\",\n  \"institutionName\": null,\n  \"institutionStudents\": null,\n  \"adults18Plus\": 2,\n  \"children2To17\": 0,\n  \"babiesLessThan2\": 0,\n  \"reducedMobility\": 0,\n  \"comment\": \"\",\n  \"originLocation\": \"CABA\",\n  \"howHeard\": \"WEB\",\n  \"acceptedPolicies\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/reservations",
@@ -514,7 +514,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"visitDate\": \"2025-12-20\",\n  \"capacity\": 100,\n  \"firstName\": \"Org\",\n  \"lastName\": \"Evento\",\n  \"dni\": \"99999999\",\n  \"phone\": \"1111111\",\n  \"email\": \"evento@example.com\",\n  \"circuit\": \"B\",\n  \"visitorType\": \"EVENT\",\n  \"adults18Plus\": 10,\n  \"children2To17\": 0,\n  \"babiesLessThan2\": 0,\n  \"reducedMobility\": 0,\n  \"allergies\": 0,\n  \"comment\": \"\"\n}"
+              "raw": "{\n  \"visitDate\": \"2025-12-20\",\n  \"capacity\": 100,\n  \"firstName\": \"Org\",\n  \"lastName\": \"Evento\",\n  \"dni\": \"99999999\",\n  \"phone\": \"1111111\",\n  \"email\": \"evento@example.com\",\n  \"circuit\": \"B\",\n  \"visitorType\": \"EVENT\",\n  \"adults18Plus\": 10,\n  \"children2To17\": 0,\n  \"babiesLessThan2\": 0,\n  \"reducedMobility\": 0,\n  \"comment\": \"\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/admin/eventos",

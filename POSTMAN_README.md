@@ -123,7 +123,7 @@ GET /api/admin/reservations/export?month=2025-12&status=PENDING&visitorType=INDI
 | **Fecha de creación** | DD/MM/YYYY (sin horario) |
 | **Rol** | "Titular" o "Visitante" |
 | **Colores** | Titulares en verde claro, Visitantes en amarillo |
-| **Columnas** | 17 columnas de información |
+| **Columnas** | 16 columnas de información |
 | **Visitantes** | Se muestran debajo del titular |
 
 ### Columnas incluidas:
@@ -142,8 +142,7 @@ GET /api/admin/reservations/export?month=2025-12&status=PENDING&visitorType=INDI
 13. Menores 2-17
 14. Bebés <2
 15. Movilidad reducida
-16. Alergias
-17. Creada
+16. Creada
 
 ---
 

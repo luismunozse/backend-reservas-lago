@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Map;
 
+@Slf4j
 @Tag(name = "Admin")
 @SecurityRequirement(name = "bearerAuth")
 @RestController
@@ -51,6 +53,7 @@ public class AdminController {
     @PutMapping("/availability/{date}")
     public void upsert(@PathVariable LocalDate date, @RequestBody Map<String, Integer> body) {
         int capacity = body.getOrDefault("capacity", 0);
+        log.info("Actualizando capacidad: fecha={}, capacidad={}", date, capacity);
         AvailabilityRule rule = availability.findByDay(date).orElseGet(AvailabilityRule::new);
         rule.setDay(date);
         rule.setCapacity(capacity);
@@ -131,6 +134,7 @@ public class AdminController {
     })
     @PostMapping("/reservations/{id}/confirm")
     public void confirmReservation(@PathVariable java.util.UUID id) {
+        log.info("Admin: confirmando reserva id={}", id);
         reservationService.confirmReservation(id);
     }
 
@@ -146,6 +150,7 @@ public class AdminController {
     })
     @PostMapping("/reservations/{id}/cancel")
     public void cancelReservation(@PathVariable java.util.UUID id) {
+        log.info("Admin: cancelando reserva id={}", id);
         reservationService.cancelReservation(id);
     }
 
@@ -180,6 +185,7 @@ public class AdminController {
     @PutMapping("/config/educational-reservations")
     public Map<String, Boolean> toggleEducationalReservations(@RequestBody Map<String, Boolean> body) {
         boolean enabled = body.getOrDefault("enabled", true);
+        log.info("Configuración: reservas educativas enabled={}", enabled);
         systemConfigService.setEducationalReservationsEnabled(enabled);
         return Map.of("enabled", enabled);
     }

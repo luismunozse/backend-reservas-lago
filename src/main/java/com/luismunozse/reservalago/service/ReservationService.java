@@ -5,6 +5,7 @@ import com.luismunozse.reservalago.model.*;
 import com.luismunozse.reservalago.repo.ReservationRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -22,9 +24,14 @@ public class ReservationService {
     private final ReservationMapper reservationMapper;
     private final ReservationExcelExporter reservationExcelExporter;
     private final AvailabilityService availabilityService;
+    private final WhatsAppService whatsAppService;
 
     @Transactional
     public UUID create(CreateReservationRequest req) {
+        log.info("Creando reserva: fecha={}, dni={}, tipo={}, pax={}",
+                req.visitDate(), req.dni(), req.visitorType(),
+                req.adults18Plus() + req.children2To17() + req.babiesLessThan2());
+
         String dni = reservationMapper.normalizeDni(req.dni());
 
         int capacity = availabilityService.capacityFor(req.visitDate());
@@ -87,7 +94,11 @@ public class ReservationService {
 
         try {
             reservations.save(r);
+            log.info("Reserva creada exitosamente: id={}, fecha={}, dni={}",
+                    r.getId(), r.getVisitDate(), dni);
         } catch (DataIntegrityViolationException ex) {
+            log.warn("Error de integridad al crear reserva: dni={}, fecha={}, error={}",
+                    dni, req.visitDate(), ex.getMessage());
             handleDataIntegrityViolation(ex);
         }
 
@@ -96,8 +107,11 @@ public class ReservationService {
 
     @Transactional
     public UUID createEvent(CreateEventRequest req) {
+        log.info("Creando evento: titulo={}, fecha={}, cupo={}",
+                req.titulo(), req.fechaISO(), req.cupo());
         Reservation r = reservationMapper.fromCreateEventRequest(req);
         reservations.save(r);
+        log.info("Evento creado: id={}", r.getId());
         return r.getId();
     }
 
@@ -139,10 +153,12 @@ public class ReservationService {
 
         // Límite de seguridad para evitar exportaciones masivas
         if (list.size() > 10000) {
+            log.warn("Exportación rechazada: demasiados registros ({})", list.size());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Demasiados registros (" + list.size() + "). Límite: 10,000. Aplique más filtros.");
         }
 
+        log.info("Exportando {} reservas a Excel", list.size());
         return reservationExcelExporter.exportExcel(list, maskContacts);
     }
 
@@ -190,18 +206,33 @@ public class ReservationService {
 
     @Transactional
     public void confirmReservation(UUID id) {
+        log.info("Confirmando reserva: id={}", id);
         Reservation reservation = reservations.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Reserva no encontrada para confirmar: id={}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada");
+                });
         reservation.setStatus(ReservationStatus.CONFIRMED);
         reservations.save(reservation);
+        log.info("Reserva confirmada: id={}, dni={}, fecha={}",
+                id, reservation.getDni(), reservation.getVisitDate());
+
+        // Enviar notificación por WhatsApp (asíncrono)
+        whatsAppService.sendConfirmation(reservation);
     }
 
     @Transactional
     public void cancelReservation(UUID id) {
+        log.info("Cancelando reserva: id={}", id);
         Reservation reservation = reservations.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada"));
+                .orElseThrow(() -> {
+                    log.warn("Reserva no encontrada para cancelar: id={}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada");
+                });
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservations.save(reservation);
+        log.info("Reserva cancelada: id={}, dni={}, fecha={}",
+                id, reservation.getDni(), reservation.getVisitDate());
     }
 
     private void handleDataIntegrityViolation(DataIntegrityViolationException ex) {

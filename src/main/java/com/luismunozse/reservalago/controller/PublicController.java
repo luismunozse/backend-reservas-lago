@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +25,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -101,6 +103,8 @@ public class PublicController {
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> create(@Valid @RequestBody CreateReservationRequest req) {
+        log.info("Nueva reserva recibida: fecha={}, tipo={}, email={}",
+                req.visitDate(), req.visitorType(), req.email());
         UUID id = reservationService.create(req);
         return Map.of("id", id.toString(), "status", "PENDING");
     }

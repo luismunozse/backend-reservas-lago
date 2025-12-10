@@ -26,7 +26,6 @@ public record CreateReservationRequest(
         @Min(0) @Schema(example = "0") int children2To17,
         @Min(0) @Schema(example = "0") int babiesLessThan2,
         @Min(0) @Schema(example = "0") int reducedMobility,
-        @Min(0) @Schema(example = "0") int allergies,
         @Schema(example = "—") String comment,
         @Schema(example = "Córdoba, AR") String originLocation,
         @NotNull @Schema(example = "ADS", allowableValues = {"SOCIAL","RECOMMENDATION","WEBSITE","ADS","OTHER"}) HowHeard howHeard,

@@ -21,20 +21,6 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-  mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: ${MAIL_SMTP_AUTH:true}
-          starttls:
-            enable: ${MAIL_SMTP_STARTTLS:true}
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
   jackson:
     time-zone: UTC
   task:
@@ -46,10 +32,11 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:86400000}
-  mail:
-    from: ${APP_MAIL_FROM}
-    fromName: ${APP_MAIL_FROM_NAME:Lago Escondido}
-    enabled: ${APP_MAIL_ENABLED:true}
+  whatsapp:
+    enabled: ${WHATSAPP_ENABLED:true}
+    account-sid: ${TWILIO_ACCOUNT_SID}
+    auth-token: ${TWILIO_AUTH_TOKEN}
+    from-number: ${TWILIO_WHATSAPP_FROM}
 
 server:
   port: ${PORT:8080}

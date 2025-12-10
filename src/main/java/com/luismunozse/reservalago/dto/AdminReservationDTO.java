@@ -23,9 +23,8 @@ public record AdminReservationDTO(
         String status,        // PENDING / CONFIRMED / CANCELLED
         Instant createdAt,
         String dni,
-        int reducedMobility,   // 👈 NUEVO
-        int allergies,         // 👈 NUEVO
-        String comment,        // 👈 NUEVO
+        int reducedMobility,
+        String comment,
 
         java.util.List<AdminVisitorDTO> visitors
 ) {}

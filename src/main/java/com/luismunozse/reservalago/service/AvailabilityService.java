@@ -4,6 +4,7 @@ import com.luismunozse.reservalago.model.AvailabilityRule;
 import com.luismunozse.reservalago.repo.AvailabilityRuleRepository;
 import com.luismunozse.reservalago.repo.ReservationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AvailabilityService {
@@ -28,6 +30,8 @@ public class AvailabilityService {
                 .orElse(defaultCapacity);
         int used = reservations.totalPeopleForDate(day);
         int remaining = Math.max(capacity - used, 0);
+        log.debug("Disponibilidad: fecha={}, capacidad={}, usado={}, disponible={}",
+                day, capacity, used, remaining);
         Map<String, Object> map = new HashMap<>();
         map.put("date", day);
         map.put("capacity", capacity);

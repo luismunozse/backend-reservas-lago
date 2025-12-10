@@ -40,5 +40,11 @@ logs/
 ssl/
 backup_*.sql
 
+### Scripts con credenciales ###
+run-dev.ps1
+run-dev.sh
+.env
+.env.local
+
 ### Docker ###
 docker-compose.override.yml

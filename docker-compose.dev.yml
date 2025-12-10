@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:16
@@ -18,13 +16,6 @@ services:
       timeout: 5s
       retries: 5
 
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: lago-mailhog-dev
-    ports:
-      - "8025:8025"
-      - "1025:1025"
-
   app:
     build:
       context: .
@@ -35,16 +26,14 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/lago
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      MAIL_HOST: mailhog
-      MAIL_PORT: 1025
-      MAIL_SMTP_AUTH: false
-      MAIL_SMTP_STARTTLS: false
-      APP_MAIL_FROM: noreply@lago-escondido.com
-      APP_MAIL_FROM_NAME: Lago Escondido
-      APP_MAIL_ENABLED: true
       DEFAULT_CAPACITY: 30
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3002,http://127.0.0.1:3000,http://127.0.0.1:3002
       JAVA_OPTS: "-Duser.timezone=UTC"
+      # WhatsApp Twilio
+      WHATSAPP_ENABLED: "true"
+      TWILIO_ACCOUNT_SID: "${TWILIO_ACCOUNT_SID}"
+      TWILIO_AUTH_TOKEN: "${TWILIO_AUTH_TOKEN}"
+      TWILIO_WHATSAPP_FROM: "whatsapp:+14155238886"
     ports:
       - "8080:8080"
     depends_on:
