@@ -5,7 +5,6 @@ import com.luismunozse.reservalago.dto.ReservationSummaryDTO;
 import com.luismunozse.reservalago.service.ReservationService;
 import com.luismunozse.reservalago.service.AvailabilityService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;

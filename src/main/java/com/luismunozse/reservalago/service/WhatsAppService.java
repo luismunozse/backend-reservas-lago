@@ -30,7 +30,7 @@ public class WhatsAppService {
     private String fromNumber;
 
     private static final DateTimeFormatter DATE_FORMATTER =
-        DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", new Locale("es", "AR"));
+        DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale.of("es", "AR"));
 
     @PostConstruct
     public void init() {

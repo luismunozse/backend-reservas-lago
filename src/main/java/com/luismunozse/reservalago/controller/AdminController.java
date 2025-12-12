@@ -24,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -53,6 +52,14 @@ public class AdminController {
     @PutMapping("/availability/{date}")
     public void upsert(@PathVariable LocalDate date, @RequestBody Map<String, Integer> body) {
         int capacity = body.getOrDefault("capacity", 0);
+
+        // Fix #6: Validar que la capacidad no sea negativa
+        if (capacity < 0) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.BAD_REQUEST,
+                "La capacidad no puede ser negativa");
+        }
+
         log.info("Actualizando capacidad: fecha={}, capacidad={}", date, capacity);
         AvailabilityRule rule = availability.findByDay(date).orElseGet(AvailabilityRule::new);
         rule.setDay(date);

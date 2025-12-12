@@ -26,11 +26,17 @@ public class ReservationService {
     private final AvailabilityService availabilityService;
     private final WhatsAppService whatsAppService;
 
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.SERIALIZABLE)
     public UUID create(CreateReservationRequest req) {
         log.info("Creando reserva: fecha={}, dni={}, tipo={}, pax={}",
                 req.visitDate(), req.dni(), req.visitorType(),
                 req.adults18Plus() + req.children2To17() + req.babiesLessThan2());
+
+        // Fix #2: Validar que la fecha no sea en el pasado
+        if (req.visitDate().isBefore(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se pueden crear reservas para fechas pasadas");
+        }
 
         String dni = reservationMapper.normalizeDni(req.dni());
 

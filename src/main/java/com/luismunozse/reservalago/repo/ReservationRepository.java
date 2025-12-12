@@ -2,7 +2,6 @@ package com.luismunozse.reservalago.repo;
 
 import com.luismunozse.reservalago.model.Reservation;
 import com.luismunozse.reservalago.model.ReservationStatus;
-import com.luismunozse.reservalago.model.VisitorType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

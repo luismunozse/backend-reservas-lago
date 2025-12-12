@@ -4,6 +4,7 @@ import com.luismunozse.reservalago.model.Circuit;
 import com.luismunozse.reservalago.model.HowHeard;
 import com.luismunozse.reservalago.model.VisitorType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
@@ -32,5 +33,5 @@ public record CreateReservationRequest(
         @AssertTrue @Schema(example = "true") boolean acceptedPolicies,
 
         @Schema(description = "Listado de visitantes efectivamente presentes")
-        java.util.List<VisitorDTO> visitors
+        @Valid java.util.List<VisitorDTO> visitors
 ) {}
