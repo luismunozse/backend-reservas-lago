@@ -55,7 +55,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
           AND (CAST(:yearEnd AS DATE) IS NULL OR r.visit_date <= CAST(:yearEnd AS DATE))
           AND (CAST(:status AS VARCHAR) IS NULL OR r.status = CAST(:status AS VARCHAR))
           AND (CAST(:visitorType AS VARCHAR) IS NULL OR r.visitor_type = CAST(:visitorType AS VARCHAR))
-          AND (CAST(:dni AS VARCHAR) IS NULL OR r.dni = CAST(:dni AS VARCHAR))
+          AND (CAST(:dni AS VARCHAR) IS NULL OR r.dni = CAST(:dni AS VARCHAR) OR v.dni = CAST(:dni AS VARCHAR))
           AND (CAST(:name AS VARCHAR) IS NULL OR
                LOWER(r.first_name) LIKE LOWER('%' || CAST(:name AS VARCHAR) || '%') OR
                LOWER(r.last_name) LIKE LOWER('%' || CAST(:name AS VARCHAR) || '%') OR
