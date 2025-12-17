@@ -1,21 +1,27 @@
 package com.luismunozse.reservalago.service;
 
 import com.luismunozse.reservalago.model.Reservation;
+import com.luismunozse.reservalago.repo.UserRepository;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WhatsAppService {
+
+    private final UserRepository userRepository;
 
     @Value("${app.whatsapp.enabled:false}")
     private boolean enabled;
@@ -28,6 +34,9 @@ public class WhatsAppService {
 
     @Value("${app.whatsapp.from-number:whatsapp:+14155238886}")
     private String fromNumber;
+
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     private static final DateTimeFormatter DATE_FORMATTER =
         DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale.of("es", "AR"));
@@ -73,6 +82,73 @@ public class WhatsAppService {
         }
     }
 
+    @Async
+    public void sendAdminNotification(Reservation reservation) {
+        if (!enabled) {
+            log.debug("WhatsApp disabled, skipping admin notification for reservation {}", reservation.getId());
+            return;
+        }
+
+        if (accountSid.isBlank() || authToken.isBlank()) {
+            log.warn("Twilio credentials not configured, skipping admin notification");
+            return;
+        }
+
+        List<String> phones = userRepository.findAdminPhones();
+
+        if (phones.isEmpty()) {
+            log.debug("No admin phones found in database, skipping admin notification");
+            return;
+        }
+
+        String messageBody = buildAdminNotificationMessage(reservation);
+
+        for (String phone : phones) {
+            try {
+                String toNumber = normalizePhoneNumber(phone);
+
+                Message message = Message.creator(
+                        new PhoneNumber("whatsapp:" + toNumber),
+                        new PhoneNumber(fromNumber),
+                        messageBody
+                ).create();
+
+                log.info("WhatsApp admin notification sent to {} for reservation {}. SID: {}",
+                        toNumber, reservation.getId(), message.getSid());
+
+            } catch (Exception e) {
+                log.error("Failed to send WhatsApp admin notification to {} for reservation {}: {}",
+                        phone, reservation.getId(), e.getMessage());
+            }
+        }
+    }
+
+    private String buildAdminNotificationMessage(Reservation reservation) {
+        String fullName = reservation.getFirstName() + " " + reservation.getLastName();
+        String formattedDate = reservation.getVisitDate().format(DATE_FORMATTER);
+        String reservationCode = reservation.getId().toString().substring(0, 8).toUpperCase();
+        int totalPeople = reservation.getAdults18Plus() +
+                          reservation.getChildren2To17() +
+                          reservation.getBabiesLessThan2();
+        String circuit = reservation.getCircuit().name();
+        String adminUrl = frontendUrl + "/admin";
+
+        return String.format("""
+            🔔 *Nueva Reserva Pendiente*
+
+            Se ha registrado una nueva reserva que requiere revisión.
+
+            👤 *Solicitante:* %s
+            📅 *Fecha de visita:* %s
+            🎫 *Código:* %s
+            👥 *Personas:* %d
+            🗺️ *Circuito:* %s
+            📞 *Teléfono:* %s
+
+            🔗 *Acceder al panel:* %s
+            """, fullName, formattedDate, reservationCode, totalPeople, circuit, reservation.getPhone(), adminUrl);
+    }
+
     private String buildConfirmationMessage(Reservation reservation) {
         String firstName = reservation.getFirstName();
         String formattedDate = reservation.getVisitDate().format(DATE_FORMATTER);
@@ -81,6 +157,7 @@ public class WhatsAppService {
                           reservation.getChildren2To17() +
                           reservation.getBabiesLessThan2();
         String circuit = reservation.getCircuit().name();
+        String reservationDetailUrl = frontendUrl + "/reserva/" + reservation.getId();
 
         return String.format("""
             🌲 *Reserva Confirmada - Lago Escondido*
@@ -96,9 +173,11 @@ public class WhatsAppService {
 
             📍 Recuerda llegar 15 minutos antes de tu horario asignado.
 
+            🔗 *Ver detalle de tu reserva:* %s
+
             ¡Te esperamos!
             Equipo Lago Escondido
-            """, firstName, formattedDate, reservationCode, totalPeople, circuit);
+            """, firstName, formattedDate, reservationCode, totalPeople, circuit, reservationDetailUrl);
     }
 
     private String normalizePhoneNumber(String phone) {

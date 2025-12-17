@@ -27,5 +27,8 @@ public class CreateUserRequest {
 
     @Pattern(regexp = "ADMIN|MANAGER", message = "El rol debe ser ADMIN o MANAGER")
     private String role;
+
+    @Size(max = 30, message = "El teléfono no puede exceder 30 caracteres")
+    private String phone;
 }
 

@@ -1,10 +1,13 @@
 package com.luismunozse.reservalago.controller;
 
 import com.luismunozse.reservalago.dto.AdminReservationDTO;
+import com.luismunozse.reservalago.dto.CapacityRequest;
 import com.luismunozse.reservalago.dto.CreateEventRequest;
+import com.luismunozse.reservalago.dto.EducationalReservationsRequest;
+import com.luismunozse.reservalago.dto.ExportReservationsFilter;
+import jakarta.validation.Valid;
 import com.luismunozse.reservalago.model.AvailabilityRule;
 import com.luismunozse.reservalago.model.ReservationStatus;
-import com.luismunozse.reservalago.model.VisitorType;
 import com.luismunozse.reservalago.repo.AvailabilityRuleRepository;
 import com.luismunozse.reservalago.service.ReservationService;
 import com.luismunozse.reservalago.service.SystemConfigService;
@@ -18,6 +21,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -50,20 +57,11 @@ public class AdminController {
                                     """)))
     })
     @PutMapping("/availability/{date}")
-    public void upsert(@PathVariable LocalDate date, @RequestBody Map<String, Integer> body) {
-        int capacity = body.getOrDefault("capacity", 0);
-
-        // Fix #6: Validar que la capacidad no sea negativa
-        if (capacity < 0) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.BAD_REQUEST,
-                "La capacidad no puede ser negativa");
-        }
-
-        log.info("Actualizando capacidad: fecha={}, capacidad={}", date, capacity);
+    public void upsert(@PathVariable LocalDate date, @Valid @RequestBody CapacityRequest request) {
+        log.info("Actualizando capacidad: fecha={}, capacidad={}", date, request.getCapacity());
         AvailabilityRule rule = availability.findByDay(date).orElseGet(AvailabilityRule::new);
         rule.setDay(date);
-        rule.setCapacity(capacity);
+        rule.setCapacity(request.getCapacity());
         availability.save(rule);
     }
 
@@ -78,55 +76,54 @@ public class AdminController {
             @ApiResponse(responseCode = "403", description = "Sin permisos para exportar reservas")
     })
     @GetMapping("/reservations/export")
-    public ResponseEntity<byte[]> export(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) String month, // formato YYYY-MM
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) ReservationStatus status,
-            @RequestParam(required = false) VisitorType visitorType,
-            @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String name // Nombre o apellido a buscar
-    ) {
+    public ResponseEntity<byte[]> export(@ModelAttribute ExportReservationsFilter filter) {
         java.time.YearMonth ym = null;
-        if (month != null && !month.isBlank()) {
-            ym = java.time.YearMonth.parse(month);
+        if (filter.getMonth() != null && !filter.getMonth().isBlank()) {
+            ym = java.time.YearMonth.parse(filter.getMonth());
         }
 
         // Para uso administrativo exportamos siempre datos completos (sin enmascarar)
-        byte[] data = reservationService.exportExcel(date, ym, year, status, visitorType, dni, name, false);
+        byte[] data = reservationService.exportExcel(
+                filter.getDate(), ym, filter.getYear(), filter.getStatus(),
+                filter.getVisitorType(), filter.getDni(), filter.getName(), false);
 
-        String filename;
-        if (date != null) {
-            filename = String.format("reservas_%s.xlsx", date);
-        } else if (ym != null) {
-            filename = String.format("reservas_%s.xlsx", ym);
-        } else if (year != null) {
-            filename = String.format("reservas_%s.xlsx", year);
-        } else {
-            filename = "reservas.xlsx";
-        }
+        String filename = buildExportFilename(filter.getDate(), ym, filter.getYear());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(data);
     }
 
-    @Operation(summary = "Listar reservas (filtros opcionales: date, status)")
+    private String buildExportFilename(LocalDate date, java.time.YearMonth ym, Integer year) {
+        if (date != null) {
+            return String.format("reservas_%s.xlsx", date);
+        } else if (ym != null) {
+            return String.format("reservas_%s.xlsx", ym);
+        } else if (year != null) {
+            return String.format("reservas_%s.xlsx", year);
+        }
+        return "reservas.xlsx";
+    }
+
+    @Operation(summary = "Listar reservas paginadas",
+            description = "Lista reservas con paginación y filtros. Parámetros: page (0-indexed), size (default 20), sort (ej: createdAt,desc)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Listado de reservas",
+            @ApiResponse(responseCode = "200", description = "Página de reservas",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = AdminReservationDTO.class))),
             @ApiResponse(responseCode = "401", description = "No autenticado"),
             @ApiResponse(responseCode = "403", description = "Sin permisos para ver reservas")
     })
     @GetMapping({"/reservations", "/reservations/"})
-    public java.util.List<AdminReservationDTO> listReservations(
+    public Page<AdminReservationDTO> listReservations(
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) ReservationStatus status,
-            @RequestParam(required = false) String dni
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) String name,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return reservationService.adminList(date, status, dni);
+        return reservationService.adminListPaged(date, status, dni, name, pageable);
     }
 
     @Operation(summary = "Confirmar una reserva",
@@ -190,10 +187,9 @@ public class AdminController {
 
     @Operation(summary = "Habilitar/deshabilitar reservas para instituciones educativas")
     @PutMapping("/config/educational-reservations")
-    public Map<String, Boolean> toggleEducationalReservations(@RequestBody Map<String, Boolean> body) {
-        boolean enabled = body.getOrDefault("enabled", true);
-        log.info("Configuración: reservas educativas enabled={}", enabled);
-        systemConfigService.setEducationalReservationsEnabled(enabled);
-        return Map.of("enabled", enabled);
+    public Map<String, Boolean> toggleEducationalReservations(@Valid @RequestBody EducationalReservationsRequest request) {
+        log.info("Configuración: reservas educativas enabled={}", request.getEnabled());
+        systemConfigService.setEducationalReservationsEnabled(request.getEnabled());
+        return Map.of("enabled", request.getEnabled());
     }
 }

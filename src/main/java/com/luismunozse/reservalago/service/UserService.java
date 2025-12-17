@@ -6,9 +6,11 @@ import com.luismunozse.reservalago.dto.UserResponse;
 import com.luismunozse.reservalago.model.User;
 import com.luismunozse.reservalago.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +28,7 @@ public class UserService {
     public UserResponse createUser(CreateUserRequest request) {
         // Verificar si el email ya existe
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("El email ya está registrado");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
         }
 
         // Crear nuevo usuario
@@ -41,9 +43,10 @@ public class UserService {
             role = "ADMIN"; // rol por defecto
         }
         if (!role.equals("ADMIN") && !role.equals("MANAGER")) {
-            throw new IllegalArgumentException("El rol debe ser ADMIN o MANAGER");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol debe ser ADMIN o MANAGER");
         }
         user.setRole(role);
+        user.setPhone(request.getPhone());
         user.setEnabled(true);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -63,7 +66,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         return mapToResponse(user);
     }
 
@@ -71,7 +74,7 @@ public class UserService {
     public UserResponse updateUser(UUID userId, UpdateUserRequest request) {
         // Buscar usuario por ID
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         // Actualizar solo los campos que vienen en el request (no nulos)
         if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
@@ -87,7 +90,7 @@ public class UserService {
             userRepository.findByEmail(request.getEmail())
                     .ifPresent(existingUser -> {
                         if (!existingUser.getId().equals(userId)) {
-                            throw new IllegalArgumentException("El email ya está registrado");
+                            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
                         }
                     });
             user.setEmail(request.getEmail());
@@ -104,9 +107,13 @@ public class UserService {
         if (request.getRole() != null && !request.getRole().isBlank()) {
             String role = request.getRole();
             if (!role.equals("ADMIN") && !role.equals("MANAGER")) {
-                throw new IllegalArgumentException("El rol debe ser ADMIN o MANAGER");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol debe ser ADMIN o MANAGER");
             }
             user.setRole(role);
+        }
+
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone().isBlank() ? null : request.getPhone());
         }
 
         user.setUpdatedAt(LocalDateTime.now());
@@ -119,7 +126,7 @@ public class UserService {
     public void deleteUser(UUID userId) {
         // Verificar que el usuario existe
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         // Eliminar el usuario
         userRepository.delete(user);
@@ -132,6 +139,7 @@ public class UserService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .phone(user.getPhone())
                 .enabled(user.getEnabled())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())

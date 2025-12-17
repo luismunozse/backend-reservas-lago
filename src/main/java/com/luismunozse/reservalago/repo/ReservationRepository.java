@@ -3,6 +3,7 @@ package com.luismunozse.reservalago.repo;
 import com.luismunozse.reservalago.model.Reservation;
 import com.luismunozse.reservalago.model.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
+public interface ReservationRepository extends JpaRepository<Reservation, UUID>, JpaSpecificationExecutor<Reservation> {
     @Query("""
         select coalesce(sum(r.adults18Plus + r.children2To17 + r.babiesLessThan2), 0)
         from Reservation r

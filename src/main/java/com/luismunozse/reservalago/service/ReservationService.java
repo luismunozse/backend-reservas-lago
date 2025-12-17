@@ -3,6 +3,9 @@ package com.luismunozse.reservalago.service;
 import com.luismunozse.reservalago.dto.*;
 import com.luismunozse.reservalago.model.*;
 import com.luismunozse.reservalago.repo.ReservationRepository;
+import com.luismunozse.reservalago.repo.ReservationSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,6 +105,10 @@ public class ReservationService {
             reservations.save(r);
             log.info("Reserva creada exitosamente: id={}, fecha={}, dni={}",
                     r.getId(), r.getVisitDate(), dni);
+
+            // Notificar a administradores por WhatsApp (asíncrono)
+            whatsAppService.sendAdminNotification(r);
+
         } catch (DataIntegrityViolationException ex) {
             log.warn("Error de integridad al crear reserva: dni={}, fecha={}, error={}",
                     dni, req.visitDate(), ex.getMessage());
@@ -209,6 +216,13 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Page<AdminReservationDTO> adminListPaged(LocalDate date, ReservationStatus status, String dni, String name, Pageable pageable) {
+        String normalizedDni = reservationMapper.normalizeDni(dni);
+        var spec = ReservationSpecifications.withFilters(date, status, normalizedDni, name);
+        return reservations.findAll(spec, pageable)
+                .map(reservationMapper::toAdminDTO);
+    }
 
     @Transactional
     public void confirmReservation(UUID id) {

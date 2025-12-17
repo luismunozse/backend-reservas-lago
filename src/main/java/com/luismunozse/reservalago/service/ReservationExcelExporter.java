@@ -10,7 +10,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -102,7 +104,7 @@ public class ReservationExcelExporter {
             workbook.write(baos);
             return baos.toByteArray();
         } catch (IOException e) {
-            throw new IllegalStateException("Error generando archivo Excel de reservas", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error generando archivo Excel de reservas", e);
         }
     }
 

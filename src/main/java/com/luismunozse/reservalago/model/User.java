@@ -39,6 +39,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String role;
 
+    @Column(length = 30)
+    private String phone;
+
     @Column(nullable = false)
     private Boolean enabled = true;
 

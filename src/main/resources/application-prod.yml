@@ -29,6 +29,8 @@ spring:
 
 app:
   defaultCapacity: ${DEFAULT_CAPACITY:30}
+  frontend:
+    url: ${FRONTEND_URL:https://lago-escondido.com}
   jwt:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:86400000}
@@ -37,6 +39,7 @@ app:
     account-sid: ${TWILIO_ACCOUNT_SID}
     auth-token: ${TWILIO_AUTH_TOKEN}
     from-number: ${TWILIO_WHATSAPP_FROM}
+    admin-phones: ${WHATSAPP_ADMIN_PHONES:}
 
 server:
   port: ${PORT:8080}
