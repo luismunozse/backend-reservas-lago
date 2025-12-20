@@ -83,6 +83,37 @@ public class WhatsAppService {
     }
 
     @Async
+    public void sendCancellation(Reservation reservation) {
+        if (!enabled) {
+            log.debug("WhatsApp disabled, skipping cancellation notification for reservation {}", reservation.getId());
+            return;
+        }
+
+        if (accountSid.isBlank() || authToken.isBlank()) {
+            log.warn("Twilio credentials not configured, skipping WhatsApp cancellation notification");
+            return;
+        }
+
+        try {
+            String toNumber = normalizePhoneNumber(reservation.getPhone());
+            String messageBody = buildCancellationMessage(reservation);
+
+            Message message = Message.creator(
+                    new PhoneNumber("whatsapp:" + toNumber),
+                    new PhoneNumber(fromNumber),
+                    messageBody
+            ).create();
+
+            log.info("WhatsApp cancellation sent to {} for reservation {}. SID: {}",
+                    toNumber, reservation.getId(), message.getSid());
+
+        } catch (Exception e) {
+            log.error("Failed to send WhatsApp cancellation for reservation {}: {}",
+                    reservation.getId(), e.getMessage());
+        }
+    }
+
+    @Async
     public void sendAdminNotification(Reservation reservation) {
         if (!enabled) {
             log.debug("WhatsApp disabled, skipping admin notification for reservation {}", reservation.getId());
@@ -178,6 +209,33 @@ public class WhatsAppService {
             ¡Te esperamos!
             Equipo Lago Escondido
             """, firstName, formattedDate, reservationCode, totalPeople, circuit, reservationDetailUrl);
+    }
+
+    private String buildCancellationMessage(Reservation reservation) {
+        String firstName = reservation.getFirstName();
+        String formattedDate = reservation.getVisitDate().format(DATE_FORMATTER);
+        String reservationCode = reservation.getId().toString().substring(0, 8).toUpperCase();
+        int totalPeople = reservation.getAdults18Plus() +
+                          reservation.getChildren2To17() +
+                          reservation.getBabiesLessThan2();
+        String circuit = reservation.getCircuit().name();
+
+        return String.format("""
+            ❌ *Reserva Cancelada - Lago Escondido*
+
+            Hola %s,
+
+            Lamentamos informarte que tu reserva ha sido cancelada.
+
+            📅 *Fecha de visita:* %s
+            🎫 *Código de reserva:* %s
+            👥 *Personas:* %d
+            🗺️ *Circuito:* %s
+
+            Si tienes alguna consulta, no dudes en contactarnos.
+
+            Equipo Lago Escondido
+            """, firstName, formattedDate, reservationCode, totalPeople, circuit);
     }
 
     private String normalizePhoneNumber(String phone) {

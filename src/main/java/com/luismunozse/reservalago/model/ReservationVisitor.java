@@ -28,5 +28,8 @@ public class ReservationVisitor {
 
     @Column(nullable = false, length = 20)
     private String dni;
+
+    @Column(length = 20)
+    private String phone;
 }
 

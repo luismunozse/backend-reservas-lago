@@ -253,6 +253,9 @@ public class ReservationService {
         reservations.save(reservation);
         log.info("Reserva cancelada: id={}, dni={}, fecha={}",
                 id, reservation.getDni(), reservation.getVisitDate());
+
+        // Enviar notificación de cancelación por WhatsApp (asíncrono)
+        whatsAppService.sendCancellation(reservation);
     }
 
     private void handleDataIntegrityViolation(DataIntegrityViolationException ex) {

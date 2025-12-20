@@ -54,6 +54,7 @@ public class ReservationMapper {
                 rv.setFirstName(v.firstName());
                 rv.setLastName(v.lastName());
                 rv.setDni(normalizeDni(v.dni()));
+                rv.setPhone(v.phone());
                 r.getVisitors().add(rv);
             }
         }
@@ -110,7 +111,8 @@ public class ReservationMapper {
                 .map(v -> new AdminVisitorDTO(
                         v.getFirstName(),
                         v.getLastName(),
-                        v.getDni()
+                        v.getDni(),
+                        v.getPhone()
                 ))
                 .toList();
 

@@ -8,5 +8,6 @@ public record VisitorDTO(
         @Schema(example = "Juan") String firstName,
         @Schema(example = "Perez") String lastName,
         @Pattern(regexp = "\\d{8}", message = "dni debe tener exactamente 8 digitos")
-        @Schema(example = "12345678") String dni
+        @Schema(example = "12345678") String dni,
+        @Schema(example = "1155667788", description = "Teléfono del visitante (opcional)") String phone
 ) {}
