@@ -1,10 +1,8 @@
 package com.luismunozse.reservalago;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class ReservalagoApplicationTests {
+class ReservalagoApplicationTests extends IntegrationTest {
 
 	@Test
 	void contextLoads() {
