@@ -1,135 +1,218 @@
 # Backend - Sistema de Reservas Lago Escondido
 
-API REST para gestión de reservas del Lago Escondido. Backend desarrollado con Spring Boot 3 + Java 21 + PostgreSQL.
+API REST para gestión de reservas del Lago Escondido.
 
 ---
 
-## 🚀 Quick Start - Desarrollo Local
+## Stack Tecnológico
+
+| Tecnología | Versión | Descripción |
+|------------|---------|-------------|
+| Java | 21 LTS | Lenguaje principal |
+| Spring Boot | 3.5.5 | Framework backend |
+| PostgreSQL | 16 | Base de datos |
+| Flyway | 10.8.1 | Migraciones de BD |
+| JWT (jjwt) | 0.12.3 | Autenticación |
+| Twilio | 10.1.0 | Notificaciones WhatsApp |
+| Apache POI | 5.2.5 | Exportación Excel |
+| SpringDoc | 2.8.11 | Documentación OpenAPI |
+| Lombok | 1.18.30 | Reducción de boilerplate |
+| Testcontainers | - | Tests con PostgreSQL real |
+
+---
+
+## Quick Start - Desarrollo Local
 
 ### Opción 1: Docker (Recomendado)
 
 ```bash
-# 1. Entrar al directorio del backend
+# 1. Clonar y entrar al directorio
 cd backend-reservas-lago
 
-# 2. Levantar servicios (backend + PostgreSQL)
+# 2. Crear archivo .env con credenciales Twilio (opcional)
+cp env.example .env
+# Editar .env con tus credenciales
+
+# 3. Levantar servicios
 docker compose -f docker-compose.dev.yml up -d
 
-# 3. Verificar que esté corriendo
+# 4. Verificar estado
 curl http://localhost:8080/actuator/health
 
-# 4. Abrir Swagger UI en el navegador
+# 5. Abrir Swagger UI
 # http://localhost:8080/docs
 ```
 
 **Servicios disponibles:**
 - Backend API: http://localhost:8080
 - Swagger UI: http://localhost:8080/docs
-- PostgreSQL: localhost:5432 (usuario: `postgres`, password: `postgres`, db: `lago`)
-
-**Comandos útiles:**
-```bash
-# Ver logs en tiempo real
-docker compose -f docker-compose.dev.yml logs -f
-
-# Reiniciar solo el backend
-docker compose -f docker-compose.dev.yml restart app
-
-# Parar todo
-docker compose -f docker-compose.dev.yml down
-
-# Parar y eliminar datos (reset completo de DB)
-docker compose -f docker-compose.dev.yml down -v
-```
-
----
+- PostgreSQL: localhost:5432
 
 ### Opción 2: Maven Local (Requiere JDK 21)
 
 ```bash
-# 1. Levantar solo PostgreSQL con Docker
+# 1. Levantar solo PostgreSQL
 docker compose -f docker-compose.dev.yml up -d db
 
-# 2. Configurar perfil de desarrollo
+# 2. Configurar perfil
 # Windows PowerShell:
 $Env:SPRING_PROFILES_ACTIVE="dev"
 
 # Linux/macOS:
 export SPRING_PROFILES_ACTIVE=dev
 
-# 3. Arrancar el backend con Maven
-# Windows:
-.\mvnw.cmd spring-boot:run
-
-# Linux/macOS:
-./mvnw spring-boot:run
-
-# 4. Verificar
-curl http://localhost:8080/actuator/health
+# 3. Arrancar backend
+./mvnw spring-boot:run   # Linux/macOS
+.\mvnw.cmd spring-boot:run   # Windows
 ```
 
 ---
 
-## 🔑 Credenciales de Desarrollo
+## Comandos Docker Útiles
 
-### Usuario Admin por Defecto
-- **Email:** `admin@lago-escondido.com`
-- **Password:** `admin123`
-
-### Base de Datos (PostgreSQL)
-- **Host:** `localhost:5432`
-- **Database:** `lago`
-- **Usuario:** `postgres`
-- **Password:** `postgres`
-
-**Conexión directa a la DB:**
 ```bash
-# Con Docker corriendo:
+# Ver logs en tiempo real
+docker compose -f docker-compose.dev.yml logs -f
+
+# Reiniciar solo backend
+docker compose -f docker-compose.dev.yml restart app
+
+# Rebuild del backend
+docker compose -f docker-compose.dev.yml up -d --build app
+
+# Rebuild sin cache
+docker compose -f docker-compose.dev.yml build --no-cache app
+
+# Parar todo
+docker compose -f docker-compose.dev.yml down
+
+# Reset completo (elimina datos de BD)
+docker compose -f docker-compose.dev.yml down -v
+```
+
+---
+
+## Configuración
+
+### Variables de Entorno
+
+Ver [env.prod.example](env.prod.example) para la lista completa de variables de producción.
+
+**Variables principales:**
+
+| Variable | Descripción | Requerida |
+|----------|-------------|-----------|
+| `SPRING_PROFILES_ACTIVE` | Perfil de Spring (dev/prod) | Sí |
+| `SPRING_DATASOURCE_URL` | URL de conexión PostgreSQL | Sí |
+| `SPRING_DATASOURCE_USERNAME` | Usuario BD | Sí |
+| `SPRING_DATASOURCE_PASSWORD` | Password BD | Sí |
+| `JWT_SECRET` | Clave para firmar tokens | Sí (prod) |
+| `DEFAULT_CAPACITY` | Capacidad diaria por defecto | No (default: 30) |
+| `ALLOWED_ORIGINS` | URLs CORS permitidas | Sí |
+| `WHATSAPP_ENABLED` | Habilitar notificaciones | No (default: false) |
+| `TWILIO_ACCOUNT_SID` | Credencial Twilio | Si WhatsApp habilitado |
+| `TWILIO_AUTH_TOKEN` | Credencial Twilio | Si WhatsApp habilitado |
+
+### Credenciales
+
+> **IMPORTANTE:** Las credenciales de desarrollo están en `docker-compose.dev.yml`.
+> **NUNCA** usar credenciales de desarrollo en producción.
+> Para producción, copiar `env.prod.example` a `.env.prod` y configurar valores seguros.
+
+**Conexión directa a BD (desarrollo):**
+```bash
 docker exec -it lago-postgres-dev psql -U postgres -d lago
 ```
 
 ---
 
-## 📱 WhatsApp (Opcional en Desarrollo)
+## Estructura del Proyecto
 
-El sistema envía notificaciones por WhatsApp usando Twilio. Es **opcional** para desarrollo local.
-
-### Configurar WhatsApp:
-
-1. Crear archivo `.env` en la raíz del backend:
-```env
-TWILIO_ACCOUNT_SID=tu_account_sid_aqui
-TWILIO_AUTH_TOKEN=tu_auth_token_aqui
 ```
-
-2. Obtener credenciales en: https://console.twilio.com
-
-3. Reiniciar el backend:
-```bash
-docker compose -f docker-compose.dev.yml restart app
-```
-
-### Deshabilitar WhatsApp:
-
-Editar [docker-compose.dev.yml](docker-compose.dev.yml) línea 33:
-```yaml
-WHATSAPP_ENABLED: "false"
+src/main/java/com.luismunozse.reservalago/
+├── config/                         # Configuración
+│   ├── CorsConfig.java                 # CORS
+│   ├── SecurityConfig.java             # Spring Security + JWT
+│   ├── JwtAuthenticationFilter.java    # Filtro JWT
+│   └── OpenApiConfig.java              # Swagger/OpenAPI
+│
+├── controller/                     # Endpoints REST
+│   ├── PublicController.java           # API pública (reservas, disponibilidad)
+│   ├── AuthController.java             # Login/autenticación
+│   ├── AdminController.java            # API administrativa
+│   ├── UserController.java             # Gestión de usuarios
+│   └── ApiExceptionHandler.java        # Manejo global de errores
+│
+├── service/                        # Lógica de negocio
+│   ├── ReservationService.java         # Gestión de reservas
+│   ├── ReservationMapper.java          # Mapeo entidad - DTO
+│   ├── ReservationExcelExporter.java   # Exportación a Excel
+│   ├── AvailabilityService.java        # Disponibilidad y capacidad
+│   ├── WhatsAppService.java            # Notificaciones WhatsApp
+│   ├── JwtService.java                 # Generación/validación JWT
+│   ├── UserService.java                # CRUD usuarios admin
+│   ├── UserDetailsServiceImpl.java     # Spring Security UserDetails
+│   └── SystemConfigService.java        # Configuración del sistema
+│
+├── repo/                           # Repositorios JPA
+│   ├── ReservationRepository.java
+│   ├── ReservationSpecifications.java  # Criterios dinámicos
+│   ├── AvailabilityRuleRepository.java
+│   ├── UserRepository.java
+│   └── SystemConfigRepository.java
+│
+├── model/                          # Entidades JPA
+│   ├── Reservation.java
+│   ├── ReservationVisitor.java         # Acompañantes
+│   ├── AvailabilityRule.java
+│   ├── User.java
+│   ├── SystemConfig.java
+│   ├── Circuit.java                    # Enum: A, B, C, D
+│   ├── VisitorType.java                # Enum: INDIVIDUAL, EDUCATIONAL, EVENT
+│   ├── ReservationStatus.java          # Enum: PENDING, CONFIRMED, CANCELLED
+│   └── HowHeard.java                   # Enum: cómo conoció el lugar
+│
+├── dto/                            # Data Transfer Objects
+│   ├── CreateReservationRequest.java
+│   ├── ReservationSummaryDTO.java
+│   ├── AdminReservationDTO.java
+│   ├── VisitorDTO.java
+│   ├── AdminVisitorDTO.java
+│   ├── CreateEventRequest.java
+│   ├── CapacityRequest.java
+│   ├── ExportReservationsFilter.java
+│   ├── EducationalReservationsRequest.java
+│   ├── LoginRequest.java
+│   ├── LoginResponse.java
+│   ├── CreateUserRequest.java
+│   ├── UpdateUserRequest.java
+│   └── UserResponse.java
+│
+└── ReservalagoApplication.java     # Clase principal
 ```
 
 ---
 
-## 📋 Endpoints Principales
+## API Endpoints
 
-### Autenticación (Público)
+### Documentación Interactiva
 
-#### Login
+- **Swagger UI:** http://localhost:8080/docs
+- **OpenAPI JSON:** http://localhost:8080/v3/api-docs
+
+**Importar a Postman:**
+1. Abrir Postman
+2. Import - Link - `http://localhost:8080/v3/api-docs`
+
+### Autenticación
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@lago-escondido.com",
-  "password": "admin123"
+  "email": "<EMAIL>",
+  "password": "<PASSWORD>"
 }
 ```
 
@@ -137,22 +220,27 @@ Content-Type: application/json
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "email": "admin@lago-escondido.com",
-  "firstName": "Admin",
-  "lastName": "Sistema"
+  "email": "usuario@dominio.com",
+  "firstName": "Nombre",
+  "lastName": "Apellido"
 }
 ```
 
-**Usar el token en requests protegidos:**
+**Usar token en requests protegidos:**
 ```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Authorization: Bearer <TOKEN>
 ```
 
----
+### Endpoints Públicos (Sin autenticación)
 
-### API Pública (Sin autenticación)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/availability?date=YYYY-MM-DD` | Disponibilidad de un día |
+| `GET` | `/api/availability?month=YYYY-MM` | Disponibilidad del mes |
+| `POST` | `/api/reservations` | Crear reserva |
+| `GET` | `/api/reservations/{id}` | Obtener resumen de reserva |
 
-#### Consultar Disponibilidad de un Día
+**Ejemplo - Consultar disponibilidad:**
 ```http
 GET /api/availability?date=2025-01-15
 ```
@@ -167,25 +255,7 @@ GET /api/availability?date=2025-01-15
 }
 ```
 
-#### Consultar Disponibilidad de un Mes
-```http
-GET /api/availability?month=2025-01
-```
-
-**Respuesta:**
-```json
-[
-  {
-    "date": "2025-01-15",
-    "capacity": 30,
-    "currentReservations": 12,
-    "availableSlots": 18
-  },
-  ...
-]
-```
-
-#### Crear Reserva
+**Ejemplo - Crear reserva:**
 ```http
 POST /api/reservations
 Content-Type: application/json
@@ -208,241 +278,58 @@ Content-Type: application/json
 }
 ```
 
-#### Obtener Resumen de Reserva
-```http
-GET /api/reservations/{id}
-```
+### Endpoints Administrativos (Requieren JWT)
 
----
+Header requerido: `Authorization: Bearer <token>`
 
-### API Administrativa (Requiere JWT)
-
-Todos estos endpoints requieren header `Authorization: Bearer {token}`
-
-#### Listar Reservas
-```http
-GET /api/admin/reservations
-
-# Con filtros:
-GET /api/admin/reservations?date=2025-01-15
-GET /api/admin/reservations?status=CONFIRMED
-GET /api/admin/reservations?dni=12345678
-```
-
-#### Confirmar Reserva
-```http
-POST /api/admin/reservations/{id}/confirm
-```
-✅ Envía notificación por WhatsApp al cliente (si está habilitado)
-
-#### Cancelar Reserva
-```http
-POST /api/admin/reservations/{id}/cancel
-```
-✅ Envía notificación por WhatsApp al cliente (si está habilitado)
-
-#### Exportar a Excel
-```http
-GET /api/admin/reservations/export
-
-# Con filtros:
-GET /api/admin/reservations/export?month=2025-01
-GET /api/admin/reservations/export?year=2025
-GET /api/admin/reservations/export?status=CONFIRMED
-GET /api/admin/reservations/export?visitorType=INDIVIDUAL
-```
-
-#### Configurar Capacidad de un Día
-```http
-PUT /api/admin/availability/2025-01-15
-Content-Type: application/json
-
-{
-  "capacity": 50
-}
-```
-
-#### Crear Evento Especial
-```http
-POST /api/admin/eventos
-Content-Type: application/json
-
-{
-  "visitDate": "2025-02-14",
-  "organizationName": "Escuela Primaria",
-  "contactName": "María González",
-  "phone": "+5493517734676",
-  "email": "maria@escuela.com",
-  "totalPeople": 40,
-  "observations": "Grupo escolar - llegada 10am"
-}
-```
-
-#### Configuración de Reservas Educativas
-```http
-# Consultar estado
-GET /api/admin/config/educational-reservations
-
-# Habilitar/deshabilitar
-PUT /api/admin/config/educational-reservations
-Content-Type: application/json
-
-{
-  "enabled": true
-}
-```
-
----
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/admin/reservations` | Listar reservas (paginado) |
+| `GET` | `/api/admin/reservations?status=PENDING` | Filtrar por estado |
+| `GET` | `/api/admin/reservations?date=YYYY-MM-DD` | Filtrar por fecha |
+| `GET` | `/api/admin/reservations?dni=12345678` | Buscar por DNI |
+| `GET` | `/api/admin/reservations?name=Juan` | Buscar por nombre |
+| `POST` | `/api/admin/reservations/{id}/confirm` | Confirmar reserva (envía WhatsApp) |
+| `POST` | `/api/admin/reservations/{id}/cancel` | Cancelar reserva (envía WhatsApp) |
+| `GET` | `/api/admin/reservations/export` | Exportar a Excel |
+| `GET` | `/api/admin/reservations/export?month=2025-01` | Exportar mes específico |
+| `PUT` | `/api/admin/availability/{date}` | Configurar capacidad de un día |
+| `GET` | `/api/admin/availability/state?year=2025&month=1` | Estado del calendario |
+| `PUT` | `/api/admin/availability/state?year=2025&month=1` | Habilitar/deshabilitar mes |
+| `POST` | `/api/admin/eventos` | Crear evento especial |
+| `GET` | `/api/admin/config/educational-reservations` | Estado reservas educativas |
+| `PUT` | `/api/admin/config/educational-reservations` | Toggle reservas educativas |
 
 ### Gestión de Usuarios Admin
 
-#### Crear Usuario Admin
-```http
-POST /api/admin/users
-Content-Type: application/json
-Authorization: Bearer {token}
-
-{
-  "email": "admin2@lago-escondido.com",
-  "password": "password123",
-  "firstName": "Nuevo",
-  "lastName": "Admin"
-}
-```
-
-#### Listar Usuarios
-```http
-GET /api/admin/users
-Authorization: Bearer {token}
-```
-
-#### Obtener Usuario por Email
-```http
-GET /api/admin/users/admin@lago-escondido.com
-Authorization: Bearer {token}
-```
-
-#### Actualizar Usuario
-```http
-PUT /api/admin/users/{userId}
-Content-Type: application/json
-Authorization: Bearer {token}
-
-{
-  "firstName": "Nombre Actualizado",
-  "lastName": "Apellido Actualizado",
-  "enabled": true
-}
-```
-
-#### Eliminar Usuario
-```http
-DELETE /api/admin/users/{userId}
-Authorization: Bearer {token}
-```
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/admin/users` | Listar usuarios |
+| `POST` | `/api/admin/users` | Crear usuario |
+| `GET` | `/api/admin/users/{email}` | Obtener usuario por email |
+| `PUT` | `/api/admin/users/{id}` | Actualizar usuario |
+| `DELETE` | `/api/admin/users/{id}` | Eliminar usuario |
 
 ---
 
-## 🧪 Testing
+## Base de Datos
 
-### Ejecutar Tests
-```bash
-# Windows
-.\mvnw.cmd test
+### Migraciones Flyway
 
-# Linux/macOS
-./mvnw test
-```
+Las migraciones se ejecutan automáticamente al iniciar la aplicación.
 
-### Probar Endpoints con cURL
-
-**Login y obtener token:**
-```bash
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@lago-escondido.com","password":"admin123"}'
-```
-
-**Consultar disponibilidad:**
-```bash
-curl http://localhost:8080/api/availability?date=2025-01-15
-```
-
-**Listar reservas (con token):**
-```bash
-TOKEN="tu_token_aqui"
-curl http://localhost:8080/api/admin/reservations \
-  -H "Authorization: Bearer $TOKEN"
-```
-
----
-
-## 📚 Documentación API
-
-### Swagger UI (Solo Desarrollo)
-- URL: http://localhost:8080/docs
-- Interfaz visual interactiva para probar todos los endpoints
-- Autenticación JWT integrada
-
-### OpenAPI JSON
-- URL: http://localhost:8080/v3/api-docs
-- Definición completa de la API en formato OpenAPI 3
-
-**Importar a Postman:**
-1. Abrir Postman
-2. Import → Link → `http://localhost:8080/v3/api-docs`
-3. Listo para usar
-
-También hay colección Postman documentada: [POSTMAN_README.md](POSTMAN_README.md)
-
----
-
-## 🏗️ Arquitectura
-
-### Stack Tecnológico
-- **Framework:** Spring Boot 3.5.5
-- **Java:** 21 (LTS)
-- **Base de Datos:** PostgreSQL 16
-- **Migraciones:** Flyway
-- **Autenticación:** JWT (jjwt 0.12.3)
-- **Notificaciones:** WhatsApp (Twilio 10.1.0)
-- **Exportación:** Excel (Apache POI 5.2.5)
-- **Documentación:** Swagger/OpenAPI (SpringDoc 2.8.11)
-
-### Estructura del Proyecto
-```
-src/main/java/com.luismunozse.reservalago/
-├── config/                    # Configuración (Security, CORS, JWT, OpenAPI)
-├── controller/                # Endpoints REST
-│   ├── PublicController.java      # API pública
-│   ├── AuthController.java        # Login JWT
-│   ├── AdminController.java       # API administrativa
-│   └── UserController.java        # Gestión usuarios
-├── service/                   # Lógica de negocio
-│   ├── ReservationService.java    # Gestión de reservas
-│   ├── AvailabilityService.java   # Disponibilidad y capacidad
-│   ├── WhatsAppService.java       # Notificaciones WhatsApp
-│   ├── JwtService.java            # JWT tokens
-│   └── UserService.java           # Usuarios admin
-├── repo/                      # Acceso a datos (JPA)
-├── model/                     # Entidades JPA
-│   ├── Reservation.java
-│   ├── AvailabilityRule.java
-│   ├── User.java
-│   └── SystemConfig.java
-└── dto/                       # DTOs (Request/Response)
-```
-
-### Base de Datos
-
-**Migraciones Flyway** (se ejecutan automáticamente al iniciar):
-- V4: Tablas principales (reservations, availability_rules)
-- V5: Constraint único (1 reserva por DNI por día)
-- V6: Tabla de usuarios admin
-- V7: Nombres de usuarios
-- V8: Configuración del sistema
-- V9: Visitantes adicionales
-- V10: Limpieza de columnas obsoletas
+| Versión | Archivo | Descripción |
+|---------|---------|-------------|
+| V4 | `V4__init.sql` | Tablas principales (reservations, availability_rules) |
+| V5 | `V5__unique_reservation_per_day.sql` | Constraint único DNI por día |
+| V6 | `V6__create_users_table.sql` | Tabla de usuarios admin |
+| V7 | `V7__add_user_names.sql` | Nombres en usuarios |
+| V8 | `V8__create_system_config_table.sql` | Configuración del sistema |
+| V9 | `V9__create_reservation_visitors.sql` | Tabla de acompañantes |
+| V10 | `V10__drop_allergies_column.sql` | Limpieza columnas obsoletas |
+| V11 | `V11__partial_unique_index_exclude_cancelled.sql` | Índice parcial (excluye canceladas) |
+| V12 | `V12__add_phone_to_users.sql` | Teléfono en usuarios |
+| V13 | `V13__add_phone_to_reservation_visitors.sql` | Teléfono en acompañantes |
 
 **Consultar historial de migraciones:**
 ```sql
@@ -451,185 +338,22 @@ SELECT * FROM flyway_schema_history;
 
 ---
 
-## 🔧 Configuración Avanzada
+## Enums y Valores Permitidos
 
-### Variables de Entorno (Desarrollo)
-
-Estas ya están configuradas en [docker-compose.dev.yml](docker-compose.dev.yml):
-
-```yaml
-SPRING_PROFILES_ACTIVE: dev
-SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/lago
-SPRING_DATASOURCE_USERNAME: postgres
-SPRING_DATASOURCE_PASSWORD: postgres
-DEFAULT_CAPACITY: 30
-ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3002
-WHATSAPP_ENABLED: "true"
-TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
-TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
-```
-
-### Cambiar Puerto del Backend
-
-Editar [docker-compose.dev.yml](docker-compose.dev.yml) línea 38:
-```yaml
-ports:
-  - "8081:8080"  # Cambia 8081 por el puerto que prefieras
-```
-
-### Cambiar Capacidad por Defecto
-
-Editar [docker-compose.dev.yml](docker-compose.dev.yml) línea 29:
-```yaml
-DEFAULT_CAPACITY: 50  # Cambia 30 por el valor deseado
-```
-
-### Configurar CORS para Otro Frontend
-
-Editar [docker-compose.dev.yml](docker-compose.dev.yml) línea 30:
-```yaml
-ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://192.168.1.100:3000
-```
-
----
-
-## 🐛 Troubleshooting
-
-### El backend no inicia
-
-**Verificar que PostgreSQL esté corriendo:**
-```bash
-docker compose -f docker-compose.dev.yml ps
-```
-
-**Ver logs del backend:**
-```bash
-docker compose -f docker-compose.dev.yml logs app
-```
-
-**Logs de PostgreSQL:**
-```bash
-docker compose -f docker-compose.dev.yml logs db
-```
-
----
-
-### Error de conexión a la base de datos
-
-**Resetear completamente la DB:**
-```bash
-# Parar y eliminar volúmenes
-docker compose -f docker-compose.dev.yml down -v
-
-# Levantar de nuevo
-docker compose -f docker-compose.dev.yml up -d
-```
-
----
-
-### Puerto 8080 ocupado
-
-**Ver qué proceso usa el puerto:**
-```bash
-# Windows
-netstat -ano | findstr :8080
-
-# Linux/macOS
-lsof -i :8080
-```
-
-**Cambiar puerto del backend:**
-Editar `docker-compose.dev.yml` o usar:
-```bash
-# Sin Docker
-SERVER_PORT=8081 ./mvnw spring-boot:run
-```
-
----
-
-### Error CORS desde el frontend
-
-**Verificar CORS configurado en [docker-compose.dev.yml](docker-compose.dev.yml):**
-```yaml
-ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3002
-```
-
-Debe incluir la URL **exacta** desde donde el frontend hace las peticiones (incluyendo protocolo y puerto).
-
----
-
-### WhatsApp no envía mensajes
-
-**Verificar configuración:**
-1. Archivo `.env` existe en la raíz del backend
-2. Contiene `TWILIO_ACCOUNT_SID` y `TWILIO_AUTH_TOKEN`
-3. `WHATSAPP_ENABLED: "true"` en docker-compose.dev.yml
-
-**Ver logs del servicio:**
-```bash
-docker compose -f docker-compose.dev.yml logs -f app | grep WhatsApp
-```
-
-**Deshabilitar temporalmente:**
-```yaml
-# docker-compose.dev.yml línea 33
-WHATSAPP_ENABLED: "false"
-```
-
----
-
-### Migraciones Flyway fallan
-
-**Ver error específico:**
-```bash
-docker compose -f docker-compose.dev.yml logs app | grep Flyway
-```
-
-**Resetear Flyway (⚠️ BORRA TODOS LOS DATOS):**
-```bash
-# Conectar a la DB
-docker exec -it lago-postgres-dev psql -U postgres -d lago
-
-# En psql:
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-\q
-
-# Reiniciar backend (aplica migraciones de nuevo)
-docker compose -f docker-compose.dev.yml restart app
-```
-
----
-
-## 📖 Documentación Adicional
-
-| Documento | Descripción |
-|-----------|-------------|
-| [README-DOCKER.md](README-DOCKER.md) | Guía completa de docker-compose (dev vs prod) |
-| [ARQUITECTURA.md](ARQUITECTURA.md) | Decisiones técnicas y arquitectura detallada |
-| [SSL-SETUP.md](SSL-SETUP.md) | Configuración de certificados SSL (producción) |
-| [PLAN_DESPLIEGUE.md](PLAN_DESPLIEGUE.md) | Guía completa de despliegue en producción |
-| [env.prod.example](env.prod.example) | Plantilla de variables de entorno para producción |
-| [POSTMAN_README.md](POSTMAN_README.md) | Colección Postman para testing |
-
----
-
-## 📝 Enums y Valores Permitidos
-
-### Circuit (Circuitos)
+### Circuit (Circuitos de visita)
 - `A`, `B`, `C`, `D`
 
-### VisitorType (Tipo de Visitante)
-- `INDIVIDUAL`: Visitante individual o grupo familiar
-- `EDUCATIONAL`: Grupo educativo (escuelas, colegios)
-- `EVENT`: Evento especial
+### VisitorType (Tipo de visitante)
+- `INDIVIDUAL` - Visitante individual o grupo familiar
+- `EDUCATIONAL_INSTITUTION` - Institución educativa
+- `EVENT` - Evento especial
 
-### ReservationStatus (Estado de Reserva)
-- `PENDING`: Pendiente de confirmación
-- `CONFIRMED`: Confirmada (envía WhatsApp)
-- `CANCELLED`: Cancelada (envía WhatsApp)
+### ReservationStatus (Estado de reserva)
+- `PENDING` - Pendiente de confirmación
+- `CONFIRMED` - Confirmada (envía WhatsApp)
+- `CANCELLED` - Cancelada (envía WhatsApp)
 
-### HowHeard (Cómo se enteró)
+### HowHeard (Cómo conoció el lugar)
 - `REDES_SOCIALES`
 - `RECOMENDACION`
 - `WEB`
@@ -637,22 +361,165 @@ docker compose -f docker-compose.dev.yml restart app
 
 ---
 
-## 🚀 Próximos Pasos
+## Notificaciones WhatsApp
 
-1. **Desarrollo Local:** Ya está listo ✅
-2. **Testing de Features:** Usa Swagger UI http://localhost:8080/docs
-3. **Integración con Frontend:** El frontend debe apuntar a `http://localhost:8080`
-4. **Despliegue en Producción:** Ver [PLAN_DESPLIEGUE.md](PLAN_DESPLIEGUE.md) (próxima semana)
+El sistema envía notificaciones automáticas al confirmar/cancelar reservas usando Twilio.
+
+### Configuración
+
+1. Crear cuenta en [Twilio Console](https://console.twilio.com)
+2. Habilitar WhatsApp Sandbox
+3. Crear archivo `.env` en la raíz del backend:
+   ```env
+   TWILIO_ACCOUNT_SID=<tu_account_sid>
+   TWILIO_AUTH_TOKEN=<tu_auth_token>
+   ```
+4. Reiniciar el backend
+
+### Deshabilitar
+
+En `docker-compose.dev.yml`:
+```yaml
+WHATSAPP_ENABLED: "false"
+```
 
 ---
 
-## 🆘 Soporte
+## Testing
 
-- **Arquitectura técnica:** [ARQUITECTURA.md](ARQUITECTURA.md)
-- **Docker Compose:** [README-DOCKER.md](README-DOCKER.md)
-- **Despliegue:** [PLAN_DESPLIEGUE.md](PLAN_DESPLIEGUE.md)
+### Ejecutar tests
+
+```bash
+# Windows
+.\mvnw.cmd test
+
+# Linux/macOS
+./mvnw test
+```
+
+Los tests usan **Testcontainers** para levantar PostgreSQL real automáticamente.
+
+### Probar con cURL
+
+```bash
+# Consultar disponibilidad (público)
+curl http://localhost:8080/api/availability?date=2025-01-15
+
+# Login (reemplazar credenciales)
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"<EMAIL>","password":"<PASSWORD>"}'
+
+# Listar reservas (con token)
+curl http://localhost:8080/api/admin/reservations \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
+---
+
+## Troubleshooting
+
+### El backend no inicia
+
+```bash
+# Verificar contenedores
+docker compose -f docker-compose.dev.yml ps
+
+# Ver logs del backend
+docker compose -f docker-compose.dev.yml logs app
+
+# Ver logs de PostgreSQL
+docker compose -f docker-compose.dev.yml logs db
+```
+
+### Error de conexión a BD
+
+```bash
+# Reset completo
+docker compose -f docker-compose.dev.yml down -v
+docker compose -f docker-compose.dev.yml up -d
+```
+
+### Puerto 8080 ocupado
+
+```bash
+# Windows
+netstat -ano | findstr :8080
+
+# Linux/macOS
+lsof -i :8080
+
+# Cambiar puerto en docker-compose.dev.yml:
+ports:
+  - "8081:8080"
+```
+
+### Error CORS
+
+Verificar que `ALLOWED_ORIGINS` en `docker-compose.dev.yml` incluya la URL exacta del frontend (protocolo + puerto).
+
+### Migraciones Flyway fallan
+
+```bash
+# Ver error específico
+docker compose -f docker-compose.dev.yml logs app | grep -i flyway
+
+# Reset de schema (BORRA TODOS LOS DATOS)
+docker exec -it lago-postgres-dev psql -U postgres -d lago -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+# Reiniciar backend
+docker compose -f docker-compose.dev.yml restart app
+```
+
+### WhatsApp no envía mensajes
+
+1. Verificar archivo `.env` existe con credenciales Twilio
+2. Verificar `WHATSAPP_ENABLED: "true"` en docker-compose
+3. Ver logs: `docker compose -f docker-compose.dev.yml logs -f app | grep -i whatsapp`
+
+---
+
+## Seguridad
+
+### Buenas prácticas
+
+1. **NUNCA** subir archivos `.env` con credenciales reales al repositorio
+2. Usar passwords seguros (mínimo 16 caracteres)
+3. `JWT_SECRET` debe ser aleatorio y único por entorno
+4. Rotar credenciales periódicamente
+5. Usar HTTPS en producción
+
+### Generar valores seguros
+
+```bash
+# JWT_SECRET (mínimo 64 caracteres)
+openssl rand -base64 64
+
+# Database password
+openssl rand -base64 32
+
+# Admin password
+openssl rand -base64 24
+```
+
+---
+
+## Documentación Adicional
+
+| Documento | Descripción |
+|-----------|-------------|
+| [docker-compose.dev.yml](docker-compose.dev.yml) | Configuración Docker desarrollo |
+| [docker-compose.prod.yml](docker-compose.prod.yml) | Configuración Docker producción |
+| [env.prod.example](env.prod.example) | Plantilla variables de entorno |
+| [POSTMAN_README.md](POSTMAN_README.md) | Colección Postman para testing |
+
+---
+
+## Autor
+
+Desarrollado por **Luis Muñoz**
 
 ---
 
 **Versión:** 1.0.0
-**Última actualización:** Diciembre 2024
+**Última actualización:** Diciembre 2025
