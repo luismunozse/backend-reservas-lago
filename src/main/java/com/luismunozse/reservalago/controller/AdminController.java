@@ -192,4 +192,15 @@ public class AdminController {
         systemConfigService.setEducationalReservationsEnabled(request.getEnabled());
         return Map.of("enabled", request.getEnabled());
     }
+
+    @GetMapping("config/default-capacity")
+    public Map<String, Integer> getDefaultCapacity() {
+        return Map.of("capacity", systemConfigService.getDefaultCapacity());
+    }
+
+    @PutMapping("config/default-capacity")
+    public void setDefaultCapacity(@RequestBody Map<String, Integer> body) {
+        Integer cap = body.get("capacity");
+        systemConfigService.setDefaultCapacity(cap);
+    }
 }

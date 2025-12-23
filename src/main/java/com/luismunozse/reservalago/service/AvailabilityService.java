@@ -21,13 +21,19 @@ public class AvailabilityService {
 
     private final AvailabilityRuleRepository availability;
     private final ReservationRepository reservations;
+    private final SystemConfigService systemConfigService;
 
-    @Value("${app.defaultCapacity:30}")
-    private int defaultCapacity;
+
+ //   @Value("${app.defaultCapacity:30}")
+ //   private int defaultCapacity;
 
     public Map<String, Object> availabilityFor(LocalDate day) {
-        int capacity = availability.findByDay(day).map(AvailabilityRule::getCapacity)
-                .orElse(defaultCapacity);
+      //  int capacity = availability.findByDay(day).map(AvailabilityRule::getCapacity)
+        //        .orElse(defaultCapacity);
+        int capacity = availability.findByDay(day)
+                .map(AvailabilityRule::getCapacity)
+                .orElseGet(systemConfigService::getDefaultCapacity);
+
         int used = reservations.totalPeopleForDate(day);
         int remaining = Math.max(capacity - used, 0);
         log.debug("Disponibilidad: fecha={}, capacidad={}, usado={}, disponible={}",
