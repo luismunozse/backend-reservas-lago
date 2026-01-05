@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,13 +31,17 @@ class AvailabilityServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private SystemConfigService systemConfigService;
+
     @InjectMocks
     private AvailabilityService availabilityService;
 
     @BeforeEach
     void setUp() {
-        // Configurar capacidad por defecto
-        ReflectionTestUtils.setField(availabilityService, "defaultCapacity", 30);
+        // Configurar capacidad por defecto via mock de SystemConfigService
+        // lenient() porque algunos tests usan reglas específicas y no llaman a getDefaultCapacity()
+        lenient().when(systemConfigService.getDefaultCapacity()).thenReturn(30);
     }
 
     @Nested

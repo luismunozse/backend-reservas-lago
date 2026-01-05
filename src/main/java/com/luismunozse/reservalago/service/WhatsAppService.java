@@ -38,6 +38,10 @@ public class WhatsAppService {
     @Value("${app.frontend.url:http://localhost:3000}")
     private String frontendUrl;
 
+    // Content SID de los templates aprobados en Twilio
+    private static final String CONFIRMATION_TEMPLATE_SID = "HX28e149d6dc3e7a34a5377c68d83d8cb0";
+    private static final String CANCELLATION_TEMPLATE_SID = "HX025c05b19133c95145e2542d5be279e0";
+
     private static final DateTimeFormatter DATE_FORMATTER =
         DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale.of("es", "AR"));
 
@@ -65,13 +69,19 @@ public class WhatsAppService {
 
         try {
             String toNumber = normalizePhoneNumber(reservation.getPhone());
-            String messageBody = buildConfirmationMessage(reservation);
+
+            // Variable para el template: {{1}} = link reserva
+            String reservationUrl = frontendUrl + "/reserva/" + reservation.getId();
+            String contentVariables = String.format("{\"1\":\"%s\"}", reservationUrl);
 
             Message message = Message.creator(
                     new PhoneNumber("whatsapp:" + toNumber),
                     new PhoneNumber(fromNumber),
-                    messageBody
-            ).create();
+                    "" // Body vacío cuando se usa template
+            )
+            .setContentSid(CONFIRMATION_TEMPLATE_SID)
+            .setContentVariables(contentVariables)
+            .create();
 
             log.info("WhatsApp confirmation sent to {} for reservation {}. SID: {}",
                     toNumber, reservation.getId(), message.getSid());
@@ -96,13 +106,15 @@ public class WhatsAppService {
 
         try {
             String toNumber = normalizePhoneNumber(reservation.getPhone());
-            String messageBody = buildCancellationMessage(reservation);
 
+            // Template sin variables
             Message message = Message.creator(
                     new PhoneNumber("whatsapp:" + toNumber),
                     new PhoneNumber(fromNumber),
-                    messageBody
-            ).create();
+                    "" // Body vacío cuando se usa template
+            )
+            .setContentSid(CANCELLATION_TEMPLATE_SID)
+            .create();
 
             log.info("WhatsApp cancellation sent to {} for reservation {}. SID: {}",
                     toNumber, reservation.getId(), message.getSid());
