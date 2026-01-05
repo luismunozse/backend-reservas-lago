@@ -17,6 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,22 @@ public class ReservationService {
     private final AvailabilityService availabilityService;
     private final WhatsAppService whatsAppService;
 
+    private static final LocalTime VISIT_TIME = LocalTime.of(9, 30);
+    private static final ZoneId ZONE_AR = ZoneId.of("America/Argentina/Buenos_Aires");
+
+    private void validateMin24Hours(LocalDate visitDate) {
+        LocalDateTime visitDateTime = LocalDateTime.of(visitDate, VISIT_TIME);
+        LocalDateTime now = LocalDateTime.now(ZONE_AR);
+
+        long hours = Duration.between(now, visitDateTime).toHours();
+
+        if (hours < 24) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Las reservas deben realizarse con al menos 24 horas de anticipación." );
+        }
+    }
+
     @Transactional(isolation = org.springframework.transaction.annotation.Isolation.SERIALIZABLE)
     public UUID create(CreateReservationRequest req) {
         log.info("Creando reserva: fecha={}, dni={}, tipo={}, pax={}",
@@ -40,6 +61,9 @@ public class ReservationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "No se pueden crear reservas para fechas pasadas");
         }
+
+        // Fix #3: Validar mínimo 24 horas de anticipación
+        validateMin24Hours(req.visitDate());
 
         String dni = reservationMapper.normalizeDni(req.dni());
 
@@ -153,22 +177,22 @@ public class ReservationService {
 
         // Consulta optimizada en base de datos (native query requiere Strings para enums)
         List<Reservation> list = reservations.findWithFilters(
-            date,
-            monthStart,
-            monthEnd,
-            yearStart,
-            yearEnd,
-            status != null ? status.name() : null,
-            visitorType != null ? visitorType.name() : null,
-            normalizedDni,
-            name
+                date,
+                monthStart,
+                monthEnd,
+                yearStart,
+                yearEnd,
+                status != null ? status.name() : null,
+                visitorType != null ? visitorType.name() : null,
+                normalizedDni,
+                name
         );
 
         // Límite de seguridad para evitar exportaciones masivas
         if (list.size() > 10000) {
             log.warn("Exportación rechazada: demasiados registros ({})", list.size());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Demasiados registros (" + list.size() + "). Límite: 10,000. Aplique más filtros.");
+                    "Demasiados registros (" + list.size() + "). Límite: 10,000. Aplique más filtros.");
         }
 
         log.info("Exportando {} reservas a Excel", list.size());
@@ -269,5 +293,3 @@ public class ReservationService {
 
 
 }
-
-
