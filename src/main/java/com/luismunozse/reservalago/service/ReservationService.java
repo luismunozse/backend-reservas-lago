@@ -282,6 +282,19 @@ public class ReservationService {
         whatsAppService.sendCancellation(reservation);
     }
 
+    @Transactional
+    public void deleteReservation(UUID id) {
+        log.info("Eliminando reserva: id={}", id);
+        Reservation reservation = reservations.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Reserva no encontrada para eliminar: id={}", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva no encontrada");
+                });
+        reservations.delete(reservation);
+        log.info("Reserva eliminada: id={}, dni={}, fecha={}",
+                id, reservation.getDni(), reservation.getVisitDate());
+    }
+
     private void handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         String root = ex.getMessage() != null ? ex.getMessage() : "";
         if (root.contains("ux_reservations_date_dni")) {

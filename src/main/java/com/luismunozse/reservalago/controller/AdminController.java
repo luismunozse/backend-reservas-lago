@@ -158,6 +158,23 @@ public class AdminController {
         reservationService.cancelReservation(id);
     }
 
+    @Operation(summary = "Eliminar una reserva",
+            description = "Elimina permanentemente una reserva de la base de datos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Reserva eliminada correctamente"),
+            @ApiResponse(responseCode = "404", description = "Reserva no encontrada",
+                    content = @Content(mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    { "error": "Reserva no encontrada" }
+                                    """)))
+    })
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable java.util.UUID id) {
+        log.info("Admin: eliminando reserva id={}", id);
+        reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Crear un evento (reserva tipo EVENT)",
             description = "Crea una reserva especial de tipo EVENT con capacidad (cupo) predefinida")
     @ApiResponses(value = {
