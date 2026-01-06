@@ -28,6 +28,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       DEFAULT_CAPACITY: 30
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3002,http://127.0.0.1:3000,http://127.0.0.1:3002
+      FRONTEND_URL: https://reservalagoescondido.com.ar
       JAVA_OPTS: "-Duser.timezone=UTC"
       # WhatsApp Twilio
       WHATSAPP_ENABLED: "true"

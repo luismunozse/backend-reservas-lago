@@ -30,7 +30,7 @@ spring:
 app:
   defaultCapacity: ${DEFAULT_CAPACITY:30}
   frontend:
-    url: ${FRONTEND_URL:https://lago-escondido.com}
+    url: ${FRONTEND_URL:https://reservalagoescondido.com.ar}
   jwt:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:86400000}
@@ -89,7 +89,7 @@ management:
 
 # Configuración de CORS para producción
 cors:
-  allowed-origins: ${ALLOWED_ORIGINS:https://lago-escondido.com,https://www.lago-escondido.com}
+  allowed-origins: ${ALLOWED_ORIGINS:https://reservalagoescondido.com.ar,https://www.reservalagoescondido.com.ar}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true

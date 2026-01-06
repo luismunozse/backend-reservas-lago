@@ -131,6 +131,12 @@
             <artifactId>twilio</artifactId>
             <version>10.1.0</version>
         </dependency>
+        <!-- Bucket4j para Rate Limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>8.10.1</version>
+        </dependency>
     </dependencies>
 
 	<build>

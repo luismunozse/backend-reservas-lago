@@ -48,8 +48,11 @@ services:
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
       TWILIO_WHATSAPP_FROM: ${TWILIO_WHATSAPP_FROM}
 
+      # Frontend URL (para links en WhatsApp)
+      FRONTEND_URL: ${FRONTEND_URL:-https://reservalagoescondido.com.ar}
+
       # CORS
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://lago-escondido.com,https://www.lago-escondido.com}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://reservalagoescondido.com.ar,https://www.reservalagoescondido.com.ar}
       
       # Puerto
       PORT: 8080
