@@ -40,7 +40,7 @@ public class WhatsAppService {
 
     // Content SID de los templates aprobados en Twilio
     private static final String CONFIRMATION_TEMPLATE_SID = "HXb04d053f5285a221a637c8c42ca38174";
-    private static final String CANCELLATION_TEMPLATE_SID = "HX025c05b19133c95145e2542d5be279e0";
+    private static final String CANCELLATION_TEMPLATE_SID = "HX6f0d4e09cc08b307c6494a15ffeb4d9a";
 
     private static final DateTimeFormatter DATE_FORMATTER =
         DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'de' yyyy", Locale.of("es", "AR"));
