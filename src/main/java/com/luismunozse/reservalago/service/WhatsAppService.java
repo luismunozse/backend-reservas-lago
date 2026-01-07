@@ -39,7 +39,7 @@ public class WhatsAppService {
     private String frontendUrl;
 
     // Content SID de los templates aprobados en Twilio
-    private static final String CONFIRMATION_TEMPLATE_SID = "HX28e149d6dc3e7a34a5377c68d83d8cb0";
+    private static final String CONFIRMATION_TEMPLATE_SID = "HXb04d053f5285a221a637c8c42ca38174";
     private static final String CANCELLATION_TEMPLATE_SID = "HX025c05b19133c95145e2542d5be279e0";
 
     private static final DateTimeFormatter DATE_FORMATTER =
@@ -70,9 +70,18 @@ public class WhatsAppService {
         try {
             String toNumber = normalizePhoneNumber(reservation.getPhone());
 
-            // Variable para el template: {{1}} = link reserva
+            // Variables para el template:
+            // {{1}} = código de reserva
+            // {{2}} = fecha de visita
+            // {{3}} = link a detalles
+            String reservationCode = reservation.getId().toString().substring(0, 8).toUpperCase();
+            String formattedDate = reservation.getVisitDate().format(DATE_FORMATTER);
             String reservationUrl = frontendUrl + "/reserva/" + reservation.getId();
-            String contentVariables = String.format("{\"1\":\"%s\"}", reservationUrl);
+
+            String contentVariables = String.format(
+                "{\"1\":\"%s\",\"2\":\"%s\",\"3\":\"%s\"}",
+                reservationCode, formattedDate, reservationUrl
+            );
 
             Message message = Message.creator(
                     new PhoneNumber("whatsapp:" + toNumber),
