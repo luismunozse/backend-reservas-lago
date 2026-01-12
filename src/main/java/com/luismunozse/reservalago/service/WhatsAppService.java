@@ -39,7 +39,8 @@ public class WhatsAppService {
     private String frontendUrl;
 
     // Content SID de los templates aprobados en Twilio
-    private static final String CONFIRMATION_TEMPLATE_SID = "HXb04d053f5285a221a637c8c42ca38174";
+   // private static final String CONFIRMATION_TEMPLATE_SID = "HXb04d053f5285a221a637c8c42ca38174";
+    private static final String CONFIRMATION_TEMPLATE_SID = "HXeff61f75f0ffc19952d5c4692577670d";
     private static final String CANCELLATION_TEMPLATE_SID = "HX6f0d4e09cc08b307c6494a15ffeb4d9a";
 
     private static final DateTimeFormatter DATE_FORMATTER =
