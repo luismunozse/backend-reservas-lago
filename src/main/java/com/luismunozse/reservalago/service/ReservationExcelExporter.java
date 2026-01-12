@@ -39,6 +39,7 @@ public class ReservationExcelExporter {
                 "DNI",
                 "Email",
                 "Teléfono",
+                "Patente",
                 "Tipo de visitante",
                 "Circuito",
                 "Procedencia",
@@ -118,6 +119,7 @@ public class ReservationExcelExporter {
         set(row, col++, maskContacts ? mask(r.getDni()) : n(r.getDni()), style);
         set(row, col++, maskContacts ? mask(r.getEmail()) : n(r.getEmail()), style);
         set(row, col++, maskContacts ? mask(r.getPhone()) : n(r.getPhone()), style);
+        set(row, col++, n(r.getVehiclePlate()), style);
         set(row, col++, r.getVisitorType() != null ? r.getVisitorType().name() : "", style);
         set(row, col++, r.getCircuit() != null ? r.getCircuit().name() : "", style);
         set(row, col++, n(r.getOriginLocation()), style);
@@ -144,6 +146,7 @@ public class ReservationExcelExporter {
         set(row, col++, maskContacts ? mask(v.getDni()) : n(v.getDni()), style);
         set(row, col++, "", style); // Email no se repite
         set(row, col++, "", style); // Teléfono no se repite
+        set(row, col++, "", style);
         set(row, col++, "Visitante", style); // Tipo de visitante
         set(row, col++, r.getCircuit() != null ? r.getCircuit().name() : "", style);
         set(row, col++, n(r.getOriginLocation()), style);
