@@ -62,6 +62,7 @@ class ReservationServiceTest {
                 "12345678",
                 "1155667788",
                 "juan@test.com",
+                null,
                 Circuit.A,
                 VisitorType.INDIVIDUAL,
                 null,
@@ -91,7 +92,7 @@ class ReservationServiceTest {
         void shouldRejectPastDates() {
             var pastRequest = new CreateReservationRequest(
                     LocalDate.now().minusDays(1),
-                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com",
+                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     2, 0, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, true, List.of()
             );
@@ -106,7 +107,7 @@ class ReservationServiceTest {
         void shouldRejectZeroPeople() {
             var zeroRequest = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com",
+                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     0, 0, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, true, List.of()
             );
@@ -157,7 +158,7 @@ class ReservationServiceTest {
         void shouldRejectWhenEducationalDisabled() {
             var eduRequest = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Director", "Escuela", "12345678", "1155667788", "dir@escuela.com",
+                    "Director", "Escuela", "12345678", "1155667788", "dir@escuela.com", null,
                     Circuit.A, VisitorType.EDUCATIONAL_INSTITUTION, "Escuela N°1", 25,
                     2, 0, 0, 0, null, "Córdoba", HowHeard.SOCIAL, true, List.of()
             );
@@ -177,7 +178,7 @@ class ReservationServiceTest {
         void shouldRejectWithoutInstitutionName() {
             var eduRequest = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Director", "Escuela", "12345678", "1155667788", "dir@escuela.com",
+                    "Director", "Escuela", "12345678", "1155667788", "dir@escuela.com", null,
                     Circuit.A, VisitorType.EDUCATIONAL_INSTITUTION, null, 25,
                     2, 0, 0, 0, null, "Córdoba", HowHeard.SOCIAL, true, List.of()
             );
@@ -197,7 +198,7 @@ class ReservationServiceTest {
         void shouldRejectWithoutStudentCount() {
             var eduRequest = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Director", "Escuela", "12345678", "1155667788", "dir@escuela.com",
+                    "Director", "Escuela", "12345678", "1155667788", "dir@escuela.com", null,
                     Circuit.A, VisitorType.EDUCATIONAL_INSTITUTION, "Escuela N°1", null,
                     2, 0, 0, 0, null, "Córdoba", HowHeard.SOCIAL, true, List.of()
             );

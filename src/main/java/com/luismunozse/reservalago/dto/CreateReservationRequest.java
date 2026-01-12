@@ -19,6 +19,7 @@ public record CreateReservationRequest(
         @Schema(example = "12345678") String dni,
         @NotBlank @Schema(example = "+54 9 351 000-0000") String phone,
         @NotBlank @Email @Schema(example = "luis@example.com") String email,
+        String vehiclePlate,
         @NotNull @Schema(example = "A", allowableValues = {"A","B","C","D"}) Circuit circuit,
         @NotNull @Schema(example = "INDIVIDUAL", allowableValues = {"INDIVIDUAL","EDUCATIONAL_INSTITUTION", "EVENT"}) VisitorType visitorType,
         @Schema(example = "Escuela Técnica N°1") String institutionName,

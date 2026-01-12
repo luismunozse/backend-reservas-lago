@@ -25,6 +25,12 @@ public class ReservationMapper {
         return dni.trim().replace(".", "").replace("-", "");
     }
 
+    private String normalizePlate(String plate) {
+        if (plate == null || plate.isBlank()) return null;
+        return plate.trim().toUpperCase();
+    }
+
+
     public Reservation fromCreateRequest(CreateReservationRequest req, String normalizedDni) {
         Reservation r = new Reservation();
         r.setVisitDate(req.visitDate());
@@ -33,6 +39,7 @@ public class ReservationMapper {
         r.setDni(normalizedDni);
         r.setPhone(req.phone());
         r.setEmail(req.email());
+        r.setVehiclePlate(normalizePlate(req.vehiclePlate()));
         r.setCircuit(req.circuit());
         r.setVisitorType(req.visitorType());
         r.setInstitutionName(req.institutionName());
@@ -126,6 +133,7 @@ public class ReservationMapper {
                 r.getBabiesLessThan2(),
                 r.getEmail(),
                 r.getPhone(),
+                r.getVehiclePlate(),
                 r.getCircuit() != null ? r.getCircuit().name() : null,
                 r.getVisitorType() != null ? r.getVisitorType().name() : null,
                 r.getOriginLocation(),

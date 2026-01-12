@@ -133,7 +133,7 @@ class PublicControllerTest {
 
             var request = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com",
+                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     2, 1, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, true, List.of()
             );
@@ -153,7 +153,7 @@ class PublicControllerTest {
         void shouldRejectInvalidDni() throws Exception {
             var request = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Juan", "Perez", "123", "1155667788", "juan@test.com",
+                    "Juan", "Perez", "123", "1155667788", "juan@test.com", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     2, 1, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, true, List.of()
             );
@@ -171,7 +171,7 @@ class PublicControllerTest {
         void shouldRejectInvalidEmail() throws Exception {
             var request = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Juan", "Perez", "12345678", "1155667788", "invalid-email",
+                    "Juan", "Perez", "12345678", "1155667788", "invalid-email", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     2, 1, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, true, List.of()
             );
@@ -192,7 +192,7 @@ class PublicControllerTest {
 
             var request = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com",
+                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     2, 1, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, true, List.of()
             );
@@ -210,7 +210,7 @@ class PublicControllerTest {
         void shouldRejectIfPoliciesNotAccepted() throws Exception {
             var request = new CreateReservationRequest(
                     LocalDate.now().plusDays(7),
-                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com",
+                    "Juan", "Perez", "12345678", "1155667788", "juan@test.com", null,
                     Circuit.A, VisitorType.INDIVIDUAL, null, null,
                     2, 1, 0, 0, null, "Buenos Aires", HowHeard.SOCIAL, false, List.of()
             );

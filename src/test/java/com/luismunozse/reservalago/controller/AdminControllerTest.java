@@ -203,6 +203,7 @@ class AdminControllerTest {
                     2, 1, 0,
                     "juan@test.com",
                     "1155667788",
+                    null,
                     "A",
                     "INDIVIDUAL",
                     "CABA",

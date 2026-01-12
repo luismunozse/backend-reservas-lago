@@ -28,6 +28,8 @@ public class Reservation {
     private String phone;
     @Column(nullable = false)
     private String email;
+    @Column(name = "vehicle_plate", length = 10)
+    private String vehiclePlate;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VisitorType visitorType = VisitorType.INDIVIDUAL;

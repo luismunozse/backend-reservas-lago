@@ -17,6 +17,7 @@ public record AdminReservationDTO(
         int babiesLessThan2,
         String email,
         String phone,
+        String vehiclePlate,
         String circuit,       // A/B/C/D
         String visitorType,   // INDIVIDUAL / EDUCATIONAL_INSTITUTION
         String originLocation,
