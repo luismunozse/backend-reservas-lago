@@ -31,6 +31,7 @@ public class ReservationExcelExporter {
      */
     public byte[] exportExcel(List<Reservation> reservations, boolean maskContacts) {
         String[] headers = {
+                "ID",
                 "Rol",                // Titular / Visitante
                 "Fecha de visita",
                 "Estado",
@@ -111,6 +112,7 @@ public class ReservationExcelExporter {
 
     private static void fillMainRow(Row row, Reservation r, DateTimeFormatter dateFormatter, boolean maskContacts, CellStyle style) {
         int col = 0;
+        set(row, col++, r.getId() != null ? r.getId().toString() : "", style);
         set(row, col++, "Titular", style);
         set(row, col++, r.getVisitDate() != null ? r.getVisitDate().format(dateFormatter) : "", style);
         set(row, col++, r.getStatus() != null ? r.getStatus().name() : "", style);
@@ -138,14 +140,17 @@ public class ReservationExcelExporter {
 
     private static void fillVisitorRow(Row row, Reservation r, ReservationVisitor v, DateTimeFormatter dateFormatter, boolean maskContacts, CellStyle style) {
         int col = 0;
+        set(row, col++, r.getId() != null ? r.getId().toString() : "", style);
         set(row, col++, "Visitante", style);
         set(row, col++, r.getVisitDate() != null ? r.getVisitDate().format(dateFormatter) : "", style);
-        set(row, col++, "", style); // Estado
+      //  set(row, col++, "", style); // Estado
+        set(row, col++, r.getStatus() != null ? r.getStatus().name() : "", style);
         set(row, col++, n(v.getFirstName()), style);
         set(row, col++, n(v.getLastName()), style);
         set(row, col++, maskContacts ? mask(v.getDni()) : n(v.getDni()), style);
         set(row, col++, "", style); // Email no se repite
-        set(row, col++, "", style); // Teléfono no se repite
+       // set(row, col++, "", style); // Teléfono no se repite
+        set(row, col++, n(v.getPhone()), style);
         set(row, col++, "", style);
         set(row, col++, "Visitante", style); // Tipo de visitante
         set(row, col++, r.getCircuit() != null ? r.getCircuit().name() : "", style);
